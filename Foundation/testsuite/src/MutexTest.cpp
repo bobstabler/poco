@@ -1,8 +1,6 @@
 //
 // MutexTest.cpp
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/MutexTest.cpp#1 $
-//
 // Copyright (c) 2007, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "MutexTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/Exception.h"
 #include "Poco/Mutex.h"
 #include "Poco/Runnable.h"
@@ -62,7 +60,7 @@ namespace
 }
 
 
-MutexTest::MutexTest(const std::string& name): CppUnit::TestCase(name)
+MutexTest::MutexTest(const std::string& rName): CppUnit::TestCase(rName)
 {
 }
 

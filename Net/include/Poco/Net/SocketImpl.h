@@ -1,8 +1,6 @@
 //
 // SocketImpl.h
 //
-// $Id: //poco/1.4/Net/include/Poco/Net/SocketImpl.h#4 $
-//
 // Library: Net
 // Package: Sockets
 // Module:  SocketImpl
@@ -33,7 +31,7 @@ namespace Net {
 
 class Net_API SocketImpl: public Poco::RefCountedObject
 	/// This class encapsulates the Berkeley sockets API.
-	/// 
+	///
 	/// Subclasses implement specific socket types like
 	/// stream or datagram sockets.
 	///
@@ -60,7 +58,7 @@ public:
 		/// The client socket's address is returned in clientAddr.
 	
 	virtual void connect(const SocketAddress& address);
-		/// Initializes the socket and establishes a connection to 
+		/// Initializes the socket and establishes a connection to
 		/// the TCP server at the given address.
 		///
 		/// Can also be used for UDP sockets. In this case, no
@@ -68,11 +66,11 @@ public:
 		/// packets are restricted to the specified address.
 
 	virtual void connect(const SocketAddress& address, const Poco::Timespan& timeout);
-		/// Initializes the socket, sets the socket timeout and 
+		/// Initializes the socket, sets the socket timeout and
 		/// establishes a connection to the TCP server at the given address.
 
 	virtual void connectNB(const SocketAddress& address);
-		/// Initializes the socket and establishes a connection to 
+		/// Initializes the socket and establishes a connection to
 		/// the TCP server at the given address. Prior to opening the
 		/// connection the socket is set to nonblocking mode.
 	
@@ -86,6 +84,19 @@ public:
 		/// If reuseAddress is true, sets the SO_REUSEADDR
 		/// socket option.
 
+	virtual void bind(const SocketAddress& address, bool reuseAddress, bool reusePort );
+		/// Bind a local address to the socket.
+		///
+		/// This is usually only done when establishing a server
+		/// socket. TCP clients should not bind a socket to a
+		/// specific address.
+		///
+		/// If reuseAddress is true, sets the SO_REUSEADDR
+		/// socket option.
+		///
+		/// If reusePort is true, sets the SO_REUSEPORT
+		/// socket option.
+
 	virtual void bind6(const SocketAddress& address, bool reuseAddress = false, bool ipV6Only = false);
 		/// Bind a local IPv6 address to the socket.
 		///
@@ -94,6 +105,26 @@ public:
 		/// specific address.
 		///
 		/// If reuseAddress is true, sets the SO_REUSEADDR
+		/// socket option.
+		///
+		/// The given address must be an IPv6 address. The
+		/// IPPROTO_IPV6/IPV6_V6ONLY option is set on the socket
+		/// according to the ipV6Only parameter.
+		///
+		/// If the library has not been built with IPv6 support,
+		/// a Poco::NotImplementedException will be thrown.
+
+	virtual void bind6(const SocketAddress& address, bool reuseAddress, bool reusePort,  bool ipV6Only);
+		/// Bind a local IPv6 address to the socket.
+		///
+		/// This is usually only done when establishing a server
+		/// socket. TCP clients should not bind a socket to a
+		/// specific address.
+		///
+		/// If reuseAddress is true, sets the SO_REUSEADDR
+		/// socket option.
+		///
+		/// If reusePort is true, sets the SO_REUSEPORT
 		/// socket option.
 		///
 		/// The given address must be an IPv6 address. The
@@ -173,9 +204,9 @@ public:
 		/// without causing the socket to block.
 		
 	virtual bool poll(const Poco::Timespan& timeout, int mode);
-		/// Determines the status of the socket, using a 
+		/// Determines the status of the socket, using a
 		/// call to select().
-		/// 
+		///
 		/// The mode argument is constructed by combining the values
 		/// of the SelectMode enumeration.
 		///
@@ -256,27 +287,27 @@ public:
 		/// to the given time value.
 		
 	void getOption(int level, int option, int& value);
-		/// Returns the value of the socket option 
+		/// Returns the value of the socket option
 		/// specified by level and option.
 
 	void getOption(int level, int option, unsigned& value);
-		/// Returns the value of the socket option 
+		/// Returns the value of the socket option
 		/// specified by level and option.
 
 	void getOption(int level, int option, unsigned char& value);
-		/// Returns the value of the socket option 
+		/// Returns the value of the socket option
 		/// specified by level and option.
 
 	void getOption(int level, int option, Poco::Timespan& value);
-		/// Returns the value of the socket option 
+		/// Returns the value of the socket option
 		/// specified by level and option.
 	
 	void getOption(int level, int option, IPAddress& value);
-		/// Returns the value of the socket option 
+		/// Returns the value of the socket option
 		/// specified by level and option.
 
 	virtual void getRawOption(int level, int option, void* value, poco_socklen_t& length);
-		/// Returns the value of the socket option 
+		/// Returns the value of the socket option
 		/// specified by level and option.	
 	
 	void setLinger(bool on, int seconds);
@@ -421,11 +452,10 @@ private:
 	SocketImpl& operator = (const SocketImpl&);
 	
 	poco_socket_t _sockfd;
-#if defined(POCO_BROKEN_TIMEOUTS)
 	Poco::Timespan _recvTimeout;
 	Poco::Timespan _sndTimeout;
-#endif
 	bool          _blocking;
+	bool          _isBrokenTimeout;
 	
 	friend class Socket;
 	friend class SecureSocketImpl;

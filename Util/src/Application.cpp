@@ -1,8 +1,6 @@
 //
 // Application.cpp
 //
-// $Id: //poco/1.4/Util/src/Application.cpp#6 $
-//
 // Library: Util
 // Package: Application
 // Module:  Application
@@ -43,9 +41,7 @@
 #if defined(POCO_OS_FAMILY_UNIX) && !defined(POCO_VXWORKS)
 #include "Poco/SignalHandler.h"
 #endif
-#if defined(POCO_WIN32_UTF8) && !defined(POCO_NO_WSTRING)
 #include "Poco/UnicodeConverter.h"
-#endif
 
 
 using Poco::Logger;
@@ -78,7 +74,7 @@ Application::Application():
 }
 
 
-Application::Application(int argc, char* argv[]):
+Application::Application(int argc, char* pArgv[]):
 	_pConfig(new LayeredConfiguration),
 	_initialized(false),
 	_unixOptions(true),
@@ -87,7 +83,7 @@ Application::Application(int argc, char* argv[]):
 	_loadedConfigs(0)
 {
 	setup();
-	init(argc, argv);
+	init(argc, pArgv);
 }
 
 
@@ -131,14 +127,14 @@ void Application::addSubsystem(Subsystem* pSubsystem)
 }
 
 
-void Application::init(int argc, char* argv[])
+void Application::init(int argc, char* pArgv[])
 {
-	setArgs(argc, argv);
+	setArgs(argc, pArgv);
 	init();
 }
 
 
-#if defined(POCO_WIN32_UTF8) && !defined(POCO_NO_WSTRING)
+#if defined (POCO_OS_FAMILY_WINDOWS) && !defined(POCO_NO_WSTRING)
 void Application::init(int argc, wchar_t* argv[])
 {
 	std::vector<std::string> args;
@@ -170,7 +166,6 @@ void Application::init()
 	_pConfig->setString("application.dir", appPath.parent().toString());
 	_pConfig->setString("application.configDir", Path::configHome() + appPath.getBaseName() + Path::separator());
 	_pConfig->setString("application.cacheDir", Path::cacheHome() + appPath.getBaseName() + Path::separator());
-	_pConfig->setString("application.tempDir", Path::tempHome() + appPath.getBaseName() + Path::separator());
 	_pConfig->setString("application.dataDir", Path::dataHome() + appPath.getBaseName() + Path::separator());
 	processOptions();
 }
@@ -363,15 +358,15 @@ int Application::main(const ArgVec& args)
 }
 
 
-void Application::setArgs(int argc, char* argv[])
+void Application::setArgs(int argc, char* pArgv[])
 {
-	_command = argv[0];
+	_command = pArgv[0];
 	_pConfig->setInt("application.argc", argc);
 	_unprocessedArgs.reserve(argc);
 	std::string argvKey = "application.argv[";
 	for (int i = 0; i < argc; ++i)
 	{
-		std::string arg(argv[i]);
+		std::string arg(pArgv[i]);
 		_pConfig->setString(argvKey + NumberFormatter::format(i) + "]", arg);
 		_unprocessedArgs.push_back(arg);
 	}
@@ -403,13 +398,13 @@ void Application::processOptions()
 	ArgVec::iterator it = _unprocessedArgs.begin();
 	while (it != _unprocessedArgs.end() && !_stopOptionsProcessing)
 	{
-		std::string name;
+		std::string argName;
 		std::string value;
-		if (processor.process(*it, name, value))
+		if (processor.process(*it, argName, value))
 		{
-			if (!name.empty()) // "--" option to end options processing or deferred argument
+			if (!argName.empty()) // "--" option to end options processing or deferred argument
 			{
-				handleOption(name, value);
+				handleOption(argName, value);
 			}
 			it = _unprocessedArgs.erase(it);
 		}
@@ -443,7 +438,7 @@ void Application::getApplicationPath(Poco::Path& appPath) const
 		appPath.makeAbsolute();
 	}
 #elif defined(POCO_OS_FAMILY_WINDOWS)
-	#if defined(POCO_WIN32_UTF8) && !defined(POCO_NO_WSTRING)
+	#if !defined(POCO_NO_WSTRING)
 		wchar_t path[1024];
 		int n = GetModuleFileNameW(0, path, sizeof(path)/sizeof(wchar_t));
 		if (n > 0)
@@ -536,18 +531,18 @@ bool Application::findAppConfigFile(const Path& basePath, const std::string& app
 }
 
 
-void Application::defineOptions(OptionSet& options)
+void Application::defineOptions(OptionSet& rOptions)
 {
 	for (SubsystemVec::iterator it = _subsystems.begin(); it != _subsystems.end(); ++it)
 	{
-		(*it)->defineOptions(options);
+		(*it)->defineOptions(rOptions);
 	}
 }
 
 
-void Application::handleOption(const std::string& name, const std::string& value)
+void Application::handleOption(const std::string& rName, const std::string& value)
 {
-	const Option& option = _options.getOption(name);
+	const Option& option = _options.getOption(rName);
 	if (option.validator())
 	{
 		option.validator()->validate(option, value);
@@ -560,14 +555,14 @@ void Application::handleOption(const std::string& name, const std::string& value
 	}
 	if (option.callback())
 	{
-		option.callback()->invoke(name, value);
+		option.callback()->invoke(rName, value);
 	}
 }
 
 
-void Application::setLogger(Logger& logger)
+void Application::setLogger(Logger& rLogger)
 {
-	_pLogger = &logger;
+	_pLogger = &rLogger;
 }
 
 

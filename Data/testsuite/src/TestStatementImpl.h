@@ -1,8 +1,6 @@
 //
 // TestStatementImpl.h
 //
-// $Id: //poco/Main/Data/testsuite/src/TestStatementImpl.h#2 $
-//
 // Definition of the TestStatementImpl class.
 //
 // Copyright (c) 2006, Applied Informatics Software Engineering GmbH.
@@ -44,13 +42,13 @@ public:
 
 protected:
 	std::size_t columnsReturned() const;
-		/// Returns number of columns returned by query. 
+		/// Returns number of columns returned by query.
 	
 	int affectedRowCount() const;
 		/// Returns the number of affected rows.
 		/// Used to find out the number of rows affected by insert or update.
 
-	const MetaColumn& metaColumn(std::size_t pos) const;
+	const MetaColumn& metaColumn(std::size_t pos, std::size_t rsPos) const;
 		/// Returns column meta data.
 
 	bool hasNext();
@@ -82,7 +80,7 @@ private:
 	Poco::SharedPtr<Binder>     _ptrBinder;
 	Poco::SharedPtr<Extractor>  _ptrExtractor;
 	Poco::SharedPtr<Preparator> _ptrPreparation;
-	bool                        _compiled; 
+	bool                        _compiled;
 };
 
 

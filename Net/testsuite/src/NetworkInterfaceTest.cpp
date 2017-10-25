@@ -1,8 +1,6 @@
 //
 // NetworkInterfaceTest.cpp
 //
-// $Id: //poco/1.4/Net/testsuite/src/NetworkInterfaceTest.cpp#1 $
-//
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -16,8 +14,8 @@
 #ifdef POCO_NET_HAS_INTERFACE
 
 
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/Net/NetworkInterface.h"
 #include "Poco/Net/IPAddress.h"
 #include <iostream>

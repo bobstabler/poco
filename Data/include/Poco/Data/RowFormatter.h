@@ -1,8 +1,6 @@
 //
 // RowFormatter.h
 //
-// $Id: //poco/Main/Data/include/Poco/Data/RowFormatter.h#1 $
-//
 // Library: Data
 // Package: DataCore
 // Module:  RowFormatter
@@ -52,8 +50,8 @@ class Data_API RowFormatter
 	/// it with rows through RecordSet.
 	///
 	/// To accommodate for various formatting needs, a formatter can operate in two modes:
-	/// 
-	///	  - progressive: formatted individual row strings are generated and returned from each 
+	///
+	///	  - progressive: formatted individual row strings are generated and returned from each
 	///     call to formatValues;
 	///     std::string& formatNames(const NameVecPtr, std::string&) and
 	///     std::string& formatValues(const ValueVec&, std::string&) member calls should be
@@ -108,7 +106,7 @@ public:
 		/// The default implementation does nothing.
 
 	virtual const std::string& toString();
-		/// Throws NotImplementedException. Formatters operating in bulk mode should 
+		/// Throws NotImplementedException. Formatters operating in bulk mode should
 		/// implement this member function to return valid pointer to the formatted result.
 
 	virtual int rowCount() const;
@@ -150,7 +148,7 @@ protected:
 	virtual void adjustPrefix();
 		/// Adjusts prefix after it has been set.
 		/// No-op here, called by setTotalRowCount and
-		/// should be implemented by inheriting classes, 
+		/// should be implemented by inheriting classes,
 		/// if needed.
 
 private:
@@ -184,15 +182,15 @@ inline void RowFormatter::setTotalRowCount(int count)
 }
 
 
-inline void RowFormatter::setPrefix(const std::string& prefix)
+inline void RowFormatter::setPrefix(const std::string& rPrefix)
 {
-	_prefix = prefix;
+	_prefix = rPrefix;
 }
 
 
-inline void RowFormatter::setPostfix(const std::string& postfix)
+inline void RowFormatter::setPostfix(const std::string& rPostfix)
 {
-	_postfix = postfix;
+	_postfix = rPostfix;
 }
 
 

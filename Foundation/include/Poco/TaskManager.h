@@ -1,8 +1,6 @@
 //
 // TaskManager.h
 //
-// $Id: //poco/1.4/Foundation/include/Poco/TaskManager.h#2 $
-//
 // Library: Foundation
 // Package: Tasks
 // Module:  Tasks
@@ -86,7 +84,7 @@ public:
 	TaskList taskList() const;
 		/// Returns a copy of the internal task list.
 
-	int count() const;
+	std::size_t count() const;
 		/// Returns the number of tasks in the internal task list.
 
 	void addObserver(const AbstractObserver& observer);
@@ -102,7 +100,7 @@ public:
 
 protected:
 	void postNotification(const Notification::Ptr& pNf);
-		/// Posts a notification to the task manager's 
+		/// Posts a notification to the task manager's
 		/// notification center.
 
 	void taskStarted(Task* pTask);
@@ -125,11 +123,11 @@ private:
 //
 // inlines
 //
-inline int TaskManager::count() const
+inline std::size_t TaskManager::count() const
 {
 	FastMutex::ScopedLock lock(_mutex);
 
-	return (int) _taskList.size();
+	return _taskList.size();
 }
 
 

@@ -1,10 +1,8 @@
 //
 // Transaction.h
 //
-// $Id: //poco/Main/Data/include/Poco/Data/Transaction.h#2 $
-//
 // Library: Data
-// Package: Core
+// Package: DataCore
 // Module:  Transaction
 //
 // Definition of the Transaction class.
@@ -48,20 +46,20 @@ public:
 		/// to start the transaction.
 		
 	template <typename T>
-	Transaction(Poco::Data::Session& rSession, T& t, Poco::Logger* pLogger = 0): 
+	Transaction(Poco::Data::Session& rSession, T& t, Poco::Logger* pLogger = 0):
 		_rSession(rSession),
 		_pLogger(pLogger)
 		/// Creates the Transaction, using the given database session, transactor and logger.
-		/// The transactor type must provide operator () overload taking non-const Session 
+		/// The transactor type must provide operator () overload taking non-const Session
 		/// reference as an argument.
 		///
 		/// When transaction is created using this constructor, it is executed and
 		/// committed automatically. If no error occurs, rollback is disabled and does
 		/// not occur at destruction time. If an error occurs resulting in exception being
 		/// thrown, the transaction is rolled back and exception propagated to calling code.
-		/// 
+		///
 		/// Example usage:
-		/// 
+		///
 		/// struct Transactor
 		/// {
 		///		void operator () (Session& session) const
@@ -69,9 +67,9 @@ public:
 		///			// do something ...
 		///		}
 		/// };
-		/// 
+		///
 		/// Transactor tr;
-		/// Transaction tn(session, tr); 
+		/// Transaction tn(session, tr);
 	{
 		try { transact(t); }
 		catch (...)
@@ -88,7 +86,7 @@ public:
 		/// (by calling commit()), or rolled back (by calling rollback()).
 		///
 		/// If an exception is thrown during rollback, the exception is logged
-		/// and no further action is taken. 
+		/// and no further action is taken.
 
 	void setIsolation(Poco::UInt32 ti);
 		/// Sets the transaction isolation level.
@@ -117,8 +115,8 @@ public:
 		/// of this Transaction object.
 
 	template <typename T>
-	void transact(T& t)
-		/// Executes the transactor and, unless transactor throws an exception, 
+	void transact(const T& t)
+		/// Executes the transactor and, unless transactor throws an exception,
 		/// commits the transaction.
 	{
 		if (!isActive()) begin();

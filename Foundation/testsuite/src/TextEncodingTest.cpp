@@ -1,8 +1,6 @@
 //
 // TextEncodingTest.cpp
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/TextEncodingTest.cpp#1 $
-//
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "TextEncodingTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/TextEncoding.h"
 #include "Poco/Latin1Encoding.h"
 #include "Poco/Latin2Encoding.h"
@@ -26,7 +24,7 @@
 using namespace Poco;
 
 
-TextEncodingTest::TextEncodingTest(const std::string& name): CppUnit::TestCase(name)
+TextEncodingTest::TextEncodingTest(const std::string& rName): CppUnit::TestCase(rName)
 {
 }
 

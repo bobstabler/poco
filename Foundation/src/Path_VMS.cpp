@@ -1,8 +1,6 @@
 //
 // Path_VMS.cpp
 //
-// $Id: //poco/1.4/Foundation/src/Path_VMS.cpp#1 $
-//
 // Library: Foundation
 // Package: Filesystem
 // Module:  Path
@@ -52,7 +50,7 @@ std::string PathImpl::tempImpl()
 	if (result.empty())
 		return homeImpl();
 	else
-		return result; 
+		return result;
 }
 
 
@@ -105,11 +103,11 @@ void PathImpl::listRootsImpl(std::vector<std::string>& roots)
 	int stat;
 	GENERIC_64 context;
 	context.gen64$q_quadword = 0;
-	do 
+	do
 	{
 		unsigned short length;
 		stat = sys$device_scan(&deviceDsc, &length, 0, &items, &context);
-		if (stat == SS$_NORMAL) 
+		if (stat == SS$_NORMAL)
 			roots.push_back(std::string(device, length));
 	}
 	while (stat == SS$_NORMAL);

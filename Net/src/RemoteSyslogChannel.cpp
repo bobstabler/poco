@@ -1,8 +1,6 @@
 //
 // RemoteSyslogChannel.cpp
 //
-// $Id: //poco/1.4/Net/src/RemoteSyslogChannel.cpp#2 $
-//
 // Library: Net
 // Package: Logging
 // Module:  RemoteSyslogChannel
@@ -76,13 +74,13 @@ void RemoteSyslogChannel::open()
 {
 	if (_open) return;
 
-	// reset socket for the case that it has been previously closed
-	_socket = DatagramSocket();
-
 	if (_logHost.find(':') != std::string::npos)
 		_socketAddress = SocketAddress(_logHost);
 	else
 		_socketAddress = SocketAddress(_logHost, SYSLOG_PORT);
+
+	// reset socket for the case that it has been previously closed
+	_socket = DatagramSocket(_socketAddress.family());
 
 	if (_host.empty())
 	{
@@ -136,7 +134,7 @@ void RemoteSyslogChannel::log(const Message& msg)
 		m += ' ';
 		m += _name;
 		m += ' ';
-		Poco::NumberFormatter::append(m, msg.getPid());
+		Poco::NumberFormatter::append(m, static_cast<Poco::UInt64>(msg.getPid()));
 		m += ' ';
 		m += msg.getSource();
 	}

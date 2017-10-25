@@ -1,8 +1,6 @@
 //
 // Timer.cpp
 //
-// $Id: //poco/1.4/Util/src/Timer.cpp#2 $
-//
 // Library: Util
 // Package: Timer
 // Module:  Timer
@@ -226,6 +224,13 @@ Timer::Timer()
 Timer::Timer(Poco::Thread::Priority priority)
 {
 	_thread.setPriority(priority);
+	_thread.start(*this);
+}
+
+
+Timer::Timer(int prio, int policy)
+{
+	_thread.setOSPriority(prio, policy);
 	_thread.start(*this);
 }
 

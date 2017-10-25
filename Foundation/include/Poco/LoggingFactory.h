@@ -1,8 +1,6 @@
 //
 // LoggingFactory.h
 //
-// $Id: //poco/1.4/Foundation/include/Poco/LoggingFactory.h#1 $
-//
 // Library: Foundation
 // Package: Logging
 // Module:  LoggingFactory
@@ -68,13 +66,13 @@ public:
 	Channel* createChannel(const std::string& className) const;
 		/// Creates a new Channel instance from specified class.
 		///
-		/// Throws a NotFoundException if the specified channel class 
+		/// Throws a NotFoundException if the specified channel class
 		/// has not been registered.
 		
 	Formatter* createFormatter(const std::string& className) const;
 		/// Creates a new Formatter instance from specified class.
 		///
-		/// Throws a NotFoundException if the specified formatter class 
+		/// Throws a NotFoundException if the specified formatter class
 		/// has not been registered.
 
 	static LoggingFactory& defaultFactory();

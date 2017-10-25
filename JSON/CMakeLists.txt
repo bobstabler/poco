@@ -4,6 +4,7 @@ set(POCO_LIBNAME "Poco${LIBNAME}")
 # Sources
 file(GLOB SRCS_G "src/*.cpp")
 POCO_SOURCES_AUTO( SRCS ${SRCS_G})
+POCO_SOURCES(SRCS pdjson src/pd_json.c)
 
 # Headers
 file(GLOB_RECURSE HDRS_G "include/*.h" )
@@ -25,12 +26,15 @@ target_include_directories( "${LIBNAME}"
         $<INSTALL_INTERFACE:include>
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
     )
+target_compile_definitions("${LIBNAME}" PUBLIC ${LIB_MODE_DEFINITIONS})
 
 POCO_INSTALL("${LIBNAME}")
 POCO_GENERATE_PACKAGE("${LIBNAME}")
 
 if (ENABLE_TESTS)
-    add_subdirectory(samples)
     add_subdirectory(testsuite)
+endif ()
+if (ENABLE_SAMPLES)
+    add_subdirectory(samples)
 endif ()
 

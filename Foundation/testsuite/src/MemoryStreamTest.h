@@ -1,8 +1,6 @@
 //
 // MemoryStreamTest.h
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/MemoryStreamTest.h#1 $
-//
 // Definition of the MemoryStreamTest class.
 //
 // Copyright (c) 2009, Applied Informatics Software Engineering GmbH.
@@ -17,7 +15,7 @@
 
 
 #include "Poco/Foundation.h"
-#include "CppUnit/TestCase.h"
+#include "Poco/CppUnit/TestCase.h"
 
 
 class MemoryStreamTest: public CppUnit::TestCase

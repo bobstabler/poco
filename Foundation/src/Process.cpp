@@ -1,8 +1,6 @@
 //
 // Process.cpp
 //
-// $Id: //poco/1.4/Foundation/src/Process.cpp#4 $
-//
 // Library: Foundation
 // Package: Processes
 // Module:  Process
@@ -18,12 +16,12 @@
 #include "Poco/Environment.h"
 
 
-namespace 
+namespace
 {
 	std::vector<char> getEnvironmentVariablesBuffer(const Poco::Process::Env& env)
-	{   
+	{
 		std::vector<char> envbuf;
-		std::size_t pos = 0; 
+		std::size_t pos = 0;
 		
 		for (Poco::Process::Env::const_iterator it = env.begin(); it != env.end(); ++it)
 		{
@@ -40,13 +38,14 @@ namespace
 			envbuf[pos] = '\0';
 			++pos;
 		}
-	 
+	
 		envbuf.resize(pos + 1);
 		envbuf[pos] = '\0';
 	
 		return envbuf;
 	}
 	
+#if defined(POCO_OS_FAMILY_VMS)
 	void setEnvironmentVariables(const Poco::Process::Env& env)
 	{
 		for (Poco::Process::Env::const_iterator it = env.begin(); it != env.end(); ++it)
@@ -54,17 +53,16 @@ namespace
 			Poco::Environment::set(it->first, it->second);
 		}
 	}
+#endif
 }
 
 
-#if defined(POCO_OS_FAMILY_WINDOWS) && defined(POCO_WIN32_UTF8)
+#if defined(POCO_OS_FAMILY_WINDOWS)
 #if defined(_WIN32_WCE)
 #include "Process_WINCE.cpp"
 #else
-#include "Process_WIN32U.cpp"
-#endif
-#elif defined(POCO_OS_FAMILY_WINDOWS)
 #include "Process_WIN32.cpp"
+#endif
 #elif defined(POCO_VXWORKS)
 #include "Process_VX.cpp"
 #elif defined(POCO_OS_FAMILY_UNIX)

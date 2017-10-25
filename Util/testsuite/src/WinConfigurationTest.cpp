@@ -1,8 +1,6 @@
 //
 // WinConfigurationTest.cpp
 //
-// $Id: //poco/1.4/Util/testsuite/src/WinConfigurationTest.cpp#1 $
-//
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "WinConfigurationTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/Util/WinRegistryConfiguration.h"
 #include "Poco/Util/WinRegistryKey.h"
 #include "Poco/Environment.h"
@@ -57,7 +55,7 @@ void WinConfigurationTest::testConfiguration()
 #if defined(POCO_HAVE_INT64)
 	pReg->setUInt64("name2", std::numeric_limits<UInt64>::max()); // overwrite should also change type
 	assert (pReg->getUInt64("name2") == std::numeric_limits<UInt64>::max());
-	pReg->setInt64("name2", std::numeric_limits<Int64>::min()); 
+	pReg->setInt64("name2", std::numeric_limits<Int64>::min());
 	assert (pReg->getInt64("name2") == std::numeric_limits<Int64>::min());
 
 	/// write real int64 value type

@@ -1,8 +1,6 @@
 //
 // DataTest.cpp
 //
-// $Id: //poco/Main/Data/testsuite/src/DataTest.cpp#12 $
-//
 // Copyright (c) 2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "DataTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/Data/Session.h"
 #include "Poco/Data/SessionFactory.h"
 #include "Poco/Data/LOB.h"
@@ -37,6 +35,7 @@
 #include <sstream>
 #include <iomanip>
 #include <set>
+#include <tuple>
 
 
 using namespace Poco::Data::Keywords;
@@ -110,7 +109,7 @@ void DataTest::testSession()
 	sess << "DROP TABLE IF EXISTS Test", now;
 	int count;
 	sess << "SELECT COUNT(*) FROM PERSON", into(count), now;
-	
+
 	std::string str;
 	Statement stmt = (sess << "SELECT * FROM Strings", into(str), limit(50));
 	stmt.execute();
@@ -121,13 +120,13 @@ void DataTest::testSession()
 
 	try
 	{
-		stmt.execute(); 
+		stmt.execute();
 		fail ("must fail");
 	} catch (NotConnectedException&) { }
 
 	try
 	{
-		sess << "SELECT * FROM Strings", now; 
+		sess << "SELECT * FROM Strings", now;
 		fail ("must fail");
 	} catch (NotConnectedException&) { }
 
@@ -135,14 +134,14 @@ void DataTest::testSession()
 	assert (sess.getFeature("connected"));
 	assert (sess.isConnected());
 	
-	sess << "SELECT * FROM Strings", now; 
+	sess << "SELECT * FROM Strings", now;
 	stmt.execute();
 
 	sess.reconnect();
 	assert (sess.getFeature("connected"));
 	assert (sess.isConnected());
-	
-	sess << "SELECT * FROM Strings", now; 
+
+	sess << "SELECT * FROM Strings", now;
 	stmt.execute();
 }
 
@@ -151,7 +150,7 @@ void DataTest::testStatementFormatting()
 {
 	Session sess(SessionFactory::instance().create("test", "cs"));
 
-	Statement stmt = (sess << "SELECT %s%c%s,%d,%u,%f,%s FROM Person WHERE Name LIKE 'Simp%%'", 
+	Statement stmt = (sess << "SELECT %s%c%s,%d,%u,%f,%s FROM Person WHERE Name LIKE 'Simp%%'",
 		"'",'a',"'",-1, 1u, 1.5, "42", now);
 	
 	assert ("SELECT 'a',-1,1,1.500000,42 FROM Person WHERE Name LIKE 'Simp%'" == stmt.toString());
@@ -165,7 +164,7 @@ void DataTest::testFeatures()
 	sess.setFeature("f1", true);
 	assert (sess.getFeature("f1"));
 	assert (sess.getFeature("f2"));
-	
+
 	try
 	{
 		sess.setFeature("f2", false);
@@ -173,10 +172,10 @@ void DataTest::testFeatures()
 	catch (NotImplementedException&)
 	{
 	}
-	
+
 	sess.setFeature("f3", false);
 	assert (!sess.getFeature("f2"));
-	
+
 	try
 	{
 		sess.setFeature("f3", true);
@@ -184,7 +183,7 @@ void DataTest::testFeatures()
 	catch (NotImplementedException&)
 	{
 	}
-	
+
 	try
 	{
 		sess.setFeature("f4", false);
@@ -198,13 +197,13 @@ void DataTest::testFeatures()
 void DataTest::testProperties()
 {
 	Session sess(SessionFactory::instance().create("test", "cs"));
-		
+
 	sess.setProperty("p1", 1);
 	Poco::Any v1 = sess.getProperty("p1");
 	assert (Poco::AnyCast<int>(v1) == 1);
 	Poco::Any v2 = sess.getProperty("p2");
 	assert (Poco::AnyCast<int>(v2) == 1);
-	
+
 	try
 	{
 		sess.setProperty("p2", 2);
@@ -212,11 +211,11 @@ void DataTest::testProperties()
 	catch (NotImplementedException&)
 	{
 	}
-	
+
 	sess.setProperty("p3", 2);
 	v1 = sess.getProperty("p2");
 	assert (Poco::AnyCast<int>(v1) == 2);
-	
+
 	try
 	{
 		sess.setProperty("p3", 3);
@@ -224,7 +223,7 @@ void DataTest::testProperties()
 	catch (NotImplementedException&)
 	{
 	}
-	
+
 	try
 	{
 		sess.setProperty("p4", 4);
@@ -255,7 +254,7 @@ void DataTest::testLOB()
 	assert (*lobNum1.begin() == 0);
 	Poco::Data::LOB<int>::Iterator it1 = lobNum1.end();
 	assert (*(--it1) == 9);
-	
+
 	Poco::Data::LOB<int> lobNum2(lobNum1);
 	assert (lobNum2.size() == lobNum1.size());
 	assert (lobNum2 == lobNum1);
@@ -270,7 +269,7 @@ void DataTest::testCLOB()
 	std::string strAlpha = "abcdefghijklmnopqrstuvwxyz";
 	std::vector<char> vecAlpha(strAlpha.begin(), strAlpha.end());
 	std::vector<char> vecDigit(strDigit.begin(), strDigit.end());
-	
+
 	CLOB blobNumStr(strDigit.c_str(), strDigit.size());
 	assert (blobNumStr.size() == strDigit.size());
 	assert (0 == std::strncmp(strDigit.c_str(), blobNumStr.rawContent(), blobNumStr.size()));
@@ -311,7 +310,7 @@ void DataTest::testCLOB()
 	blobChrStr = CLOB(sss);
 	assert (blobChrStr == blobNumStr);
 
-    std::string xyz = "xyz";
+	std::string xyz = "xyz";
 	vLOB = xyz;
 	blobChrStr = sss = vLOB.convert<std::string>();
 	assert (0 == std::strncmp(xyz.c_str(), blobChrStr.rawContent(), blobChrStr.size()));
@@ -347,21 +346,22 @@ void DataTest::writeToCLOB(BinaryWriter& writer)
 	writer << (unsigned short) 50000;
 	writer << -123456;
 	writer << (unsigned) 123456;
+#ifndef POCO_LONG_IS_64_BIT
 	writer << (long) -1234567890;
 	writer << (unsigned long) 1234567890;
-	
+#endif // POCO_LONG_IS_64_BIT
 	writer << (Int64) -1234567890;
 	writer << (UInt64) 1234567890;
 
 	writer << (float) 1.5;
 	writer << (double) -1.5;
-	
+
 	writer << "foo";
 	writer << "";
 
 	writer << std::string("bar");
 	writer << std::string();
-	
+
 	writer.write7BitEncoded((UInt32) 100);
 	writer.write7BitEncoded((UInt32) 1000);
 	writer.write7BitEncoded((UInt32) 10000);
@@ -385,7 +385,7 @@ void DataTest::readFromCLOB(BinaryReader& reader)
 	assert (b);
 	reader >> b;
 	assert (!b);
-	
+
 	char c = ' ';
 	reader >> c;
 	assert (c == 'a');
@@ -405,7 +405,7 @@ void DataTest::readFromCLOB(BinaryReader& reader)
 	unsigned uintv = 0;
 	reader >> uintv;
 	assert (uintv == 123456);
-
+#ifndef POCO_LONG_IS_64_BIT
 	long longv = 0;
 	reader >> longv;
 	assert (longv == -1234567890);
@@ -413,11 +413,11 @@ void DataTest::readFromCLOB(BinaryReader& reader)
 	unsigned long ulongv = 0;
 	reader >> ulongv;
 	assert (ulongv == 1234567890);
-
+#endif // POCO_LONG_IS_64_BIT
 	Int64 int64v = 0;
 	reader >> int64v;
 	assert (int64v == -1234567890);
-	
+
 	UInt64 uint64v = 0;
 	reader >> uint64v;
 	assert (uint64v == 1234567890);
@@ -425,7 +425,7 @@ void DataTest::readFromCLOB(BinaryReader& reader)
 	float floatv = 0.0;
 	reader >> floatv;
 	assert (floatv == 1.5);
-	
+
 	double doublev = 0.0;
 	reader >> doublev;
 	assert (doublev == -1.5);
@@ -435,7 +435,7 @@ void DataTest::readFromCLOB(BinaryReader& reader)
 	assert (str == "foo");
 	reader >> str;
 	assert (str == "");
-	
+
 	reader >> str;
 	assert (str == "bar");
 	reader >> str;
@@ -904,6 +904,11 @@ void DataTest::testRow()
 	assert (row[3] == 3);
 	assert (row[4] == 4);
 
+	const Row& cr = row;
+	assert(cr["field0"] == 0);
+	assert(cr[0] == 0);
+	assert(cr.get(0) == 0);
+
 	try
 	{
 		int i; i = row[5].convert<int>(); // to silence gcc
@@ -947,7 +952,7 @@ void DataTest::testRow()
 	row3.append("field4", 4);
 
 	assert (row3 == row);
-	assert (!(row < row3 | row3 < row));
+	assert (!(row < row3 || row3 < row));
 
 	Row row4(row3.names());
 	try
@@ -955,18 +960,6 @@ void DataTest::testRow()
 		row4.set("badfieldname", 0);
 		fail ("must fail");
 	}catch (NotFoundException&) {}
-
-	try
-	{
-		row4.set("field1", Var());
-		row4.addSortField(1);
-		row4.removeSortField(0);
-		fail ("must fail - field 1 is empty");
-	}
-	catch (IllegalStateException&)
-	{
-		row4.removeSortField(1);
-	}
 
 	row4.set("field0", 0);
 	row4.set("field1", 1);
@@ -1183,9 +1176,9 @@ void DataTest::testSimpleRowFormatter()
 	std::streamsize sp = rf.getSpacing();
 
 	std::string line(std::string::size_type(sz * 5 + sp * 4), '-');
-	std::string spacer(sp, ' ');
+	std::string spacer(static_cast<std::size_t>(sp), ' ');
 	std::ostringstream os;
-	os << std::left 
+	os << std::left
 		<< std::setw(sz) << "field0"
 		<< spacer
 		<< std::setw(sz) << "field1"
@@ -1194,12 +1187,12 @@ void DataTest::testSimpleRowFormatter()
 		<< spacer
 		<< std::setw(sz) << "field3"
 		<< spacer
-		<< std::setw(sz) << "field4" << std::endl 
+		<< std::setw(sz) << "field4" << std::endl
 		<< line << std::endl;
 	assert (row1.namesToString() == os.str());
 
 	os.str("");
-	os << std::right 
+	os << std::right
 		<< std::setw(sz) << "0"
 		<< spacer
 		<< std::setw(sz) << "1"
@@ -1260,7 +1253,7 @@ void DataTest::testDateAndTime()
 	assert (dt.second() == t.second());
 	
 	Date d1(2007, 6, 15);
-	d1.assign(d.year() - 1, d.month(), d.day());
+	d1.assign(d.year() - 1, d.month(), (d.month() == 2 && d.day() == 29) ? 28 : d.day());
 	assert (d1 < d); assert (d1 != d);
 
 	d1.assign(d.year() - 1, 12, d.day());
@@ -1272,7 +1265,7 @@ void DataTest::testDateAndTime()
 		assert (d1 < d); assert (d1 != d);
 	}
 
-	d1.assign(d.year() + 1, d.month(), d.day());
+	d1.assign(d.year() + 1, d.month(), (d.month() == 2 && d.day() == 29) ? 28 : d.day());
 	assert (d1 > d); assert (d1 != d);
 	
 	d1.assign(d.year() + 1, 1, d.day());
@@ -1314,7 +1307,7 @@ void DataTest::testDateAndTime()
 		assert (t1 < t); assert (t1 != t);
 	}
 
-	if (t.hour() < 23) 
+	if (t.hour() < 23)
 	{
 		t1.assign(t.hour() + 1, t.minute(), t.second());
 		assert (t1 > t); assert (t1 != t);
@@ -1407,6 +1400,18 @@ void DataTest::testExternalBindingAndExtraction()
 }
 
 
+void DataTest::testStdTuple()
+{
+	using Row = std::tuple<std::string, std::string, int>;
+
+	Session sess(SessionFactory::instance().create("test", "cs"));
+	Row person = std::make_tuple(std::string("Scott"), std::string("Washington, DC"), 42);
+	sess << "INSERT INTO Person(name, address, age) VALUES (?, ?, ?)", use(person), now;
+	std::vector<Row> rows;
+	sess << "SELECT name, address, age FROM Person", into(rows) , now;
+}
+
+
 void DataTest::setUp()
 {
 }
@@ -1438,6 +1443,8 @@ CppUnit::Test* DataTest::suite()
 	CppUnit_addTest(pSuite, DataTest, testJSONRowFormatter);
 	CppUnit_addTest(pSuite, DataTest, testDateAndTime);
 	CppUnit_addTest(pSuite, DataTest, testExternalBindingAndExtraction);
+	CppUnit_addTest(pSuite, DataTest, testStdTuple);
+
 
 	return pSuite;
 }

@@ -24,18 +24,32 @@ set_target_properties( "${LIBNAME}"
     DEFINE_SYMBOL Util_EXPORTS
     )
 
-target_link_libraries( "${LIBNAME}" JSON XML Foundation)
+target_link_libraries( "${LIBNAME}" Foundation)
+if (ENABLE_XML)
+	target_link_libraries( "${LIBNAME}" XML)
+else ()
+	add_definitions( -DPOCO_UTIL_NO_XMLCONFIGURATION )
+endif()
+if (ENABLE_JSON)
+	target_link_libraries( "${LIBNAME}" JSON)
+else ()
+	add_definitions( -DPOCO_UTIL_NO_JSONCONFIGURATION )
+endif()
+
 target_include_directories( "${LIBNAME}"
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
     )
+target_compile_definitions("${LIBNAME}" PUBLIC ${LIB_MODE_DEFINITIONS})
 
 POCO_INSTALL("${LIBNAME}")
 POCO_GENERATE_PACKAGE("${LIBNAME}")
 
 if (ENABLE_TESTS)
-    add_subdirectory(samples)
     add_subdirectory(testsuite)
+endif ()
+if (ENABLE_SAMPLES)
+    add_subdirectory(samples)
 endif ()

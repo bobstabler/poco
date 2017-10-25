@@ -13,9 +13,9 @@ POCO_HEADERS_AUTO( SRCS ${HDRS_G})
 if(WIN32)
     if(WINCE)
         set(SYSLIBS ${SYSLIBS} "ws2.lib" "iphlpapi.lib")
-    else()    
+    else()
         set(SYSLIBS ${SYSLIBS} "ws2_32.lib" "iphlpapi.lib")
-    endif()    
+    endif()
 endif(WIN32)
 
 add_library( "${LIBNAME}" ${LIB_MODE} ${SRCS} )
@@ -34,12 +34,15 @@ target_include_directories( "${LIBNAME}"
         $<INSTALL_INTERFACE:include>
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
     )
+target_compile_definitions("${LIBNAME}" PUBLIC ${LIB_MODE_DEFINITIONS})
 
 POCO_INSTALL("${LIBNAME}")
 POCO_GENERATE_PACKAGE("${LIBNAME}")
 
 if (ENABLE_TESTS)
-    add_subdirectory(samples)
     add_subdirectory(testsuite)
+endif ()
+if (ENABLE_SAMPLES)
+    add_subdirectory(samples)
 endif ()
 

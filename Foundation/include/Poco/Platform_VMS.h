@@ -1,8 +1,6 @@
 //
 // Platform_VMS.h
 //
-// $Id: //poco/1.4/Foundation/include/Poco/Platform_VMS.h#1 $
-//
 // Library: Foundation
 // Package: Core
 // Module:  Platform
@@ -22,7 +20,7 @@
 
 
 // Define the POCO_DESCRIPTOR_STRING and POCO_DESCRIPTOR_LITERAL
-// macros which we use instead of $DESCRIPTOR and $DESCRIPTOR64. 
+// macros which we use instead of $DESCRIPTOR and $DESCRIPTOR64.
 // Our macros work with both 32bit and 64bit pointer sizes.
 #if __INITIAL_POINTER_SIZE != 64
 	#define POCO_DESCRIPTOR_STRING(name, string) \

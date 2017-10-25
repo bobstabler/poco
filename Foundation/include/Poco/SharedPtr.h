@@ -1,8 +1,6 @@
 //
 // SharedPtr.h
 //
-// $Id: //poco/1.4/Foundation/include/Poco/SharedPtr.h#1 $
-//
 // Library: Foundation
 // Package: Core
 // Module:  SharedPtr
@@ -96,11 +94,11 @@ class SharedPtr
 	/// can be used with any class. For this to work, a
 	/// SharedPtr manages a reference count for the object
 	/// it manages.
-	/// 
+	///
 	/// SharedPtr works in the following way:
 	/// If an SharedPtr is assigned an ordinary pointer to
 	/// an object (via the constructor or the assignment operator),
-	/// it takes ownership of the object and the object's reference 
+	/// it takes ownership of the object and the object's reference
 	/// count is initialized to one.
 	/// If the SharedPtr is assigned another SharedPtr, the
 	/// object's reference count is incremented by one.
@@ -121,16 +119,16 @@ public:
 
 	SharedPtr(C* ptr)
 	try:
-		_pCounter(new RC), 
+		_pCounter(new RC),
 		_ptr(ptr)
 	{
 	}
-	catch (...) 
+	catch (...)
 	{
 		RP::release(ptr);
 	}
 
-	template <class Other, class OtherRP> 
+	template <class Other, class OtherRP>
 	SharedPtr(const SharedPtr<Other, RC, OtherRP>& ptr): _pCounter(ptr._pCounter), _ptr(const_cast<Other*>(ptr.get()))
 	{
 		_pCounter->duplicate();
@@ -206,7 +204,7 @@ public:
 		std::swap(_pCounter, ptr._pCounter);
 	}
 
-	template <class Other> 
+	template <class Other>
 	SharedPtr<Other, RC, RP> cast() const
 		/// Casts the SharedPtr via a dynamic cast to the given type.
 		/// Returns an SharedPtr containing NULL if the cast fails.
@@ -221,7 +219,7 @@ public:
 		return SharedPtr<Other, RC, RP>();
 	}
 
-	template <class Other> 
+	template <class Other>
 	SharedPtr<Other, RC, RP> unsafeCast() const
 		/// Casts the SharedPtr via a static cast to the given type.
 		/// Example: (assume class Sub: public Super)
@@ -378,7 +376,7 @@ public:
 		return _pCounter->referenceCount();
 	}
 
-private:
+protected:
 	C* deref() const
 	{
 		if (!_ptr)
@@ -408,7 +406,7 @@ private:
 		_pCounter->duplicate();
 	}
 
-private:
+protected:
 	RC* _pCounter;
 	C*  _ptr;
 

@@ -1,8 +1,6 @@
 //
 // Task.h
 //
-// $Id: //poco/1.4/Foundation/include/Poco/Task.h#2 $
-//
 // Library: Foundation
 // Package: Tasks
 // Module:  Tasks
@@ -36,7 +34,7 @@ class NotificationCenter;
 
 
 class Foundation_API Task: public Runnable, public RefCountedObject
-	/// A Task is a subclass of Runnable that has a name 
+	/// A Task is a subclass of Runnable that has a name
 	/// and supports progress reporting and cancellation.
 	///
 	/// A TaskManager object can be used to take care of the
@@ -74,7 +72,7 @@ public:
 
 	bool isCancelled() const;
 		/// Returns true if cancellation of the task has been
-		/// requested. 
+		/// requested.
 		///
 		/// A Task's runTask() method should periodically
 		/// call this method and stop whatever it is doing in an

@@ -1,8 +1,6 @@
 //
 // URITest.h
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/URITest.h#2 $
-//
 // Definition of the URITest class.
 //
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
@@ -17,7 +15,7 @@
 
 
 #include "Poco/Foundation.h"
-#include "CppUnit/TestCase.h"
+#include "Poco/CppUnit/TestCase.h"
 
 
 class URITest: public CppUnit::TestCase

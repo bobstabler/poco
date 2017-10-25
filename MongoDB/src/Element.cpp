@@ -7,8 +7,6 @@
 // Package: MongoDB
 // Module:  Element
 //
-// Implementation of the Element class.
-//
 // Copyright (c) 2012, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -28,7 +26,7 @@ Element::Element(const std::string& name) : _name(name)
 }
 
 
-Element::~Element() 
+Element::~Element()
 {
 }
 

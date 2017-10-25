@@ -1,8 +1,6 @@
 //
 // Base64Encoder.h
 //
-// $Id: //poco/1.4/Foundation/include/Poco/Base64Encoder.h#2 $
-//
 // Library: Foundation
 // Package: Streams
 // Module:  Base64
@@ -48,7 +46,7 @@ public:
 	void setLineLength(int lineLength);
 		/// Specify the line length.
 		///
-		/// After the given number of characters have been written, 
+		/// After the given number of characters have been written,
 		/// a newline character will be written.
 		///
 		/// Specify 0 for an unlimited line length.

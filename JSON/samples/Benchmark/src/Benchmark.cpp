@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 		else
 		{
 			std::cout << filePath.toString() << " doesn't exist!" << std::endl;
-			return 1; 
+			return 1;
 		}
 	}
 
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 
 		//Serialize to string
 		Poco::JSON::Object::Ptr obj;
-		if ( result.type() == typeid(Poco::JSON::Object::Ptr) )
+		if (result.type() == typeid(Poco::JSON::Object::Ptr))
 			obj = result.extract<Poco::JSON::Object::Ptr>();
 
 		std::ostringstream out;

@@ -1,8 +1,6 @@
 //
 // MD5EngineTest.cpp
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/MD5EngineTest.cpp#1 $
-//
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "MD5EngineTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/MD5Engine.h"
 
 
@@ -20,7 +18,7 @@ using Poco::MD5Engine;
 using Poco::DigestEngine;
 
 
-MD5EngineTest::MD5EngineTest(const std::string& name): CppUnit::TestCase(name)
+MD5EngineTest::MD5EngineTest(const std::string& rName): CppUnit::TestCase(rName)
 {
 }
 

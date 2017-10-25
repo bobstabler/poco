@@ -1,9 +1,7 @@
 //
 // SessionImpl.cpp
 //
-// $Id: //poco/Main/Data/SQLite/src/SessionImpl.cpp#5 $
-//
-// Library: SQLite
+// Library: Data/SQLite
 // Package: SQLite
 // Module:  SessionImpl
 //
@@ -30,6 +28,7 @@
 #include "sqlite3.h"
 #endif
 #include <cstdlib>
+#include <limits>
 
 
 #ifndef SQLITE_OPEN_URI
@@ -55,10 +54,10 @@ SessionImpl::SessionImpl(const std::string& fileName, std::size_t loginTimeout):
 	_isTransaction(false)
 {
 	open();
-	setConnectionTimeout(CONNECTION_TIMEOUT_DEFAULT);
+	setConnectionTimeout(loginTimeout);
 	setProperty("handle", _pDB);
-	addFeature("autoCommit", 
-		&SessionImpl::autoCommit, 
+	addFeature("autoCommit",
+		&SessionImpl::autoCommit,
 		&SessionImpl::isAutoCommit);
 	addProperty("connectionTimeout", &SessionImpl::setConnectionTimeout, &SessionImpl::getConnectionTimeout);
 }
@@ -184,7 +183,7 @@ void SessionImpl::open(const std::string& connect)
 	{
 		ActiveConnector connector(connectionString(), &_pDB);
 		ActiveResult<int> result = connector.connect();
-		if (!result.tryWait(getLoginTimeout() * 1000))
+		if (!result.tryWait(static_cast<long>(getLoginTimeout()) * 1000))
 			throw ConnectionFailedException("Timed out.");
 
 		int rc = result.data();
@@ -193,7 +192,7 @@ void SessionImpl::open(const std::string& connect)
 			close();
 			Utility::throwException(rc);
 		}
-	} 
+	}
 	catch (SQLiteException& ex)
 	{
 		throw ConnectionFailedException(ex.displayText());
@@ -207,7 +206,27 @@ void SessionImpl::close()
 {
 	if (_pDB)
 	{
-		sqlite3_close(_pDB);
+		int result = 0;
+		int times = 10;
+		do
+		{
+			result = sqlite3_close(_pDB);
+		} while (SQLITE_BUSY == result && --times > 0);
+
+		if (SQLITE_BUSY == result && times == 0)
+		{
+			times = 10;
+			sqlite3_stmt *pStmt = NULL;
+			do
+			{
+				pStmt = sqlite3_next_stmt(_pDB, NULL);
+				if (pStmt && sqlite3_stmt_busy(pStmt))
+				{
+					sqlite3_finalize(pStmt);
+				}
+			} while (pStmt != NULL && --times > 0);
+			sqlite3_close(_pDB);
+		}
 		_pDB = 0;
 	}
 
@@ -223,10 +242,18 @@ bool SessionImpl::isConnected()
 
 void SessionImpl::setConnectionTimeout(std::size_t timeout)
 {
-	int tout = 1000 * timeout;
-	int rc = sqlite3_busy_timeout(_pDB, tout);
-	if (rc != 0) Utility::throwException(rc);
-	_timeout = tout;
+	if(timeout <= std::numeric_limits<int>::max()/1000)
+	{
+		int tout = 1000 * static_cast<int>(timeout);
+		int rc = sqlite3_busy_timeout(_pDB, tout);
+		if (rc != 0) Utility::throwException(rc);
+		_timeout = tout;
+	}
+	else
+	{
+		throw RangeException
+				("Occurred integer overflow because of timeout value.");
+	}
 }
 
 

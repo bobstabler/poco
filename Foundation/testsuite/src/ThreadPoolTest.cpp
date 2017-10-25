@@ -1,8 +1,6 @@
 //
 // ThreadPoolTest.cpp
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/ThreadPoolTest.cpp#1 $
-//
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "ThreadPoolTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/ThreadPool.h"
 #include "Poco/RunnableAdapter.h"
 #include "Poco/Exception.h"
@@ -25,7 +23,7 @@ using Poco::RunnableAdapter;
 using Poco::Thread;
 
 
-ThreadPoolTest::ThreadPoolTest(const std::string& name): CppUnit::TestCase(name), _event(Event::EVENT_MANUALRESET)
+ThreadPoolTest::ThreadPoolTest(const std::string& rName): CppUnit::TestCase(rName), _event(Event::EVENT_MANUALRESET)
 {
 }
 
@@ -38,7 +36,7 @@ ThreadPoolTest::~ThreadPoolTest()
 void ThreadPoolTest::startThreadPoolTest(int affinityPolicy)
 {
 	int cpu = -1;
-	if (affinityPolicy == static_cast<int>(ThreadPool::TAP_CUSTOM)) 
+	if (affinityPolicy == static_cast<int>(ThreadPool::TAP_CUSTOM))
 	{
 		cpu = 0;
 	}

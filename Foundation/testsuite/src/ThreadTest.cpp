@@ -1,8 +1,6 @@
 //
 // ThreadTest.cpp
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/ThreadTest.cpp#1 $
-//
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "ThreadTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/Thread.h"
 #include "Poco/Runnable.h"
 #include "Poco/ThreadTarget.h"
@@ -148,7 +146,7 @@ private:
 };
 
 
-ThreadTest::ThreadTest(const std::string& name): CppUnit::TestCase(name)
+ThreadTest::ThreadTest(const std::string& rName): CppUnit::TestCase(rName)
 {
 }
 
@@ -388,7 +386,6 @@ void ThreadTest::testThreadFunctor()
 
 	assert (!thread.isRunning());
 
-#if __cplusplus >= 201103L
 
 	Thread thread2;
 
@@ -404,7 +401,6 @@ void ThreadTest::testThreadFunctor()
 
 	assert (!thread2.isRunning());
 
-#endif
 }
 
 
@@ -426,11 +422,7 @@ void ThreadTest::testThreadStackSize()
 	thread.setStackSize(stackSize);
 
 #if !defined(POCO_OS_FAMILY_BSD) // on BSD family, stack size is rounded
-#ifdef PTHREAD_STACK_MIN
-	assert (PTHREAD_STACK_MIN == thread.getStackSize());
-#else
 	assert (stackSize >= thread.getStackSize());
-#endif
 #endif
 
 	tmp = MyRunnable::_staticVar;
@@ -499,6 +491,13 @@ void ThreadTest::testAffinity()
 }
 
 
+void ThreadTest::testJoinNotStarted()
+{
+	Thread thread;
+	thread.join();
+}
+
+
 void ThreadTest::setUp()
 {
 }
@@ -528,6 +527,7 @@ CppUnit::Test* ThreadTest::suite()
 	CppUnit_addTest(pSuite, ThreadTest, testThreadStackSize);
 	CppUnit_addTest(pSuite, ThreadTest, testSleep);
 	CppUnit_addTest(pSuite, ThreadTest, testAffinity);
+	CppUnit_addTest(pSuite, ThreadTest, testJoinNotStarted);
 
 	return pSuite;
 }

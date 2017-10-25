@@ -1,8 +1,6 @@
 //
 // MemoryStreamTest.cpp
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/MemoryStreamTest.cpp#2 $
-//
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "MemoryStreamTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/Buffer.h"
 #include "Poco/MemoryStream.h"
 #include <sstream>
@@ -22,7 +20,7 @@ using Poco::MemoryInputStream;
 using Poco::MemoryOutputStream;
 
 
-MemoryStreamTest::MemoryStreamTest(const std::string& name): CppUnit::TestCase(name)
+MemoryStreamTest::MemoryStreamTest(const std::string& rName): CppUnit::TestCase(rName)
 {
 }
 

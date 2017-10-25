@@ -1,8 +1,6 @@
 //
 // SharedLibrary_VMS.cpp
 //
-// $Id: //poco/1.4/Foundation/src/SharedLibrary_VMS.cpp#2 $
-//
 // Library: Foundation
 // Package: SharedLibrary
 // Module:  SharedLibrary
@@ -93,7 +91,7 @@ void* SharedLibraryImpl::findSymbolImpl(const std::string& name)
 	{
 		unsigned sig = sigarr.chf$is_sig_name;
 		unsigned act = LIB$_ACTIMAGE;
-		if (lib$match_cond(&sig, &act)) 
+		if (lib$match_cond(&sig, &act))
 			throw LibraryLoadException(_path);
 	}
 	return (void*) value;
@@ -106,9 +104,15 @@ const std::string& SharedLibraryImpl::getPathImpl() const
 }
 
 
+std::string SharedLibraryImpl::prefixImpl()
+{
+	return "";
+}
+
+
 std::string SharedLibraryImpl::suffixImpl()
 {
-#if defined(_DEBUG)
+#if defined(_DEBUG) && !defined(POCO_NO_SHARED_LIBRARY_DEBUG_SUFFIX)
 	return "d.exe";
 #else
 	return ".exe";

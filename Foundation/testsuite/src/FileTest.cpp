@@ -1,8 +1,6 @@
 //
 // FileTest.cpp
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/FileTest.cpp#1 $
-//
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "FileTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/File.h"
 #include "Poco/TemporaryFile.h"
 #include "Poco/Path.h"
@@ -21,7 +19,6 @@
 #include <fstream>
 #include <set>
 
-GCC_DIAG_OFF(unused-variable)
 
 using Poco::File;
 using Poco::TemporaryFile;
@@ -31,7 +28,7 @@ using Poco::Timestamp;
 using Poco::Thread;
 
 
-FileTest::FileTest(const std::string& name): CppUnit::TestCase(name)
+FileTest::FileTest(const std::string& rName): CppUnit::TestCase(rName)
 {
 }
 
@@ -181,6 +178,33 @@ void FileTest::testFileAttributes1()
 	catch (Exception&)
 	{
 	}
+
+	try
+	{
+		f.totalSpace();
+		failmsg("file does not exist - must throw exception");
+	}
+	catch (Exception&)
+	{
+	}
+
+	try
+	{
+		f.usableSpace();
+		failmsg("file does not exist - must throw exception");
+	}
+	catch (Exception&)
+	{
+	}
+
+	try
+	{
+		f.freeSpace();
+		failmsg("file does not exist - must throw exception");
+	}
+	catch (Exception&)
+	{
+	}
 }
 
 
@@ -229,7 +253,11 @@ void FileTest::testFileAttributes2()
 void FileTest::testFileAttributes3()
 {
 #if defined(POCO_OS_FAMILY_UNIX)
-	File f("/dev/console");
+#if POCO_OS==POCO_OS_CYGWIN
+	File f("/dev/tty");
+#else
+	File f("/dev/null");
+#endif
 #elif defined(POCO_OS_FAMILY_WINDOWS) && !defined(_WIN32_WCE)
 	File f("CON");
 #endif
@@ -311,6 +339,15 @@ void FileTest::testSize()
 	assert (f.getSize() > 0);
 	f.setSize(0);
 	assert (f.getSize() == 0);
+}
+
+
+void FileTest::testSpace()
+{
+	File f(Path::home());
+	assert(f.totalSpace() > 0);
+	assert(f.usableSpace() > 0);
+	assert(f.freeSpace() > 0);
 }
 
 
@@ -485,6 +522,30 @@ void FileTest::testRename()
 }
 
 
+void FileTest::testLongPath()
+{
+#if defined(POCO_OS_FAMILY_WINDOWS) && !defined(_WIN32_WCE)
+	Poco::Path p("longpathtest");
+	p.makeAbsolute();
+	std::string longpath(p.toString());
+	while (longpath.size() < MAX_PATH*4)
+	{
+		longpath.append("\\");
+		longpath.append(64, 'x');
+	}
+
+	Poco::File d(longpath);
+	d.createDirectories();
+
+	assert (d.exists());
+	assert (d.isDirectory());
+
+	Poco::File f(p.toString());
+	f.remove(true);	
+#endif
+}
+
+
 void FileTest::setUp()
 {
 	File f("testfile.dat");
@@ -522,12 +583,14 @@ CppUnit::Test* FileTest::suite()
 	CppUnit_addTest(pSuite, FileTest, testCompare);
 	CppUnit_addTest(pSuite, FileTest, testSwap);
 	CppUnit_addTest(pSuite, FileTest, testSize);
+	CppUnit_addTest(pSuite, FileTest, testSpace);
 	CppUnit_addTest(pSuite, FileTest, testDirectory);
 	CppUnit_addTest(pSuite, FileTest, testCopy);
 	CppUnit_addTest(pSuite, FileTest, testMove);
 	CppUnit_addTest(pSuite, FileTest, testCopyDirectory);
 	CppUnit_addTest(pSuite, FileTest, testRename);
 	CppUnit_addTest(pSuite, FileTest, testRootDir);
+	CppUnit_addTest(pSuite, FileTest, testLongPath);
 
 	return pSuite;
 }

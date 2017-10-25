@@ -33,13 +33,13 @@ class PoolableObjectFactory<MongoDB::Connection, MongoDB::Connection::Ptr>
 	/// are created with the given address.
 {
 public:
-	PoolableObjectFactory(Net::SocketAddress& address)
-		: _address(address)
+	PoolableObjectFactory(Net::SocketAddress& address):
+		_address(address)
 	{
 	}
 
-	PoolableObjectFactory(const std::string& address)
-		: _address(address)
+	PoolableObjectFactory(const std::string& address):
+		_address(address)
 	{
 	}
 
@@ -86,7 +86,10 @@ public:
 	{
 		try
 		{
-			_pool.returnObject(_connection);
+			if (_connection)
+			{
+				_pool.returnObject(_connection);
+			}
 		}
 		catch (...)
 		{
@@ -99,14 +102,21 @@ public:
 		return _connection;
 	}
 
+	PooledConnection(const PooledConnection&) = delete;
+	PooledConnection& operator=(const PooledConnection&) = delete;
+
+	PooledConnection(PooledConnection&& other) = default;
+	PooledConnection& operator=(PooledConnection&&) = default;
+
+
 private:
+
 	Poco::ObjectPool<Connection, Connection::Ptr>& _pool;
 	Connection::Ptr _connection;
 };
 
 
-} // namespace MongoDB
-} // namespace Poco
+} } // namespace Poco::MongoDB
 
 
-#endif //MongoDB_PoolableConnectionFactory_INCLUDED
+#endif // MongoDB_PoolableConnectionFactory_INCLUDED

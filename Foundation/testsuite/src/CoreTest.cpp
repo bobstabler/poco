@@ -1,8 +1,6 @@
 //
 // CoreTest.cpp
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/CoreTest.cpp#2 $
-//
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "CoreTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/Bugcheck.h"
 #include "Poco/Exception.h"
 #include "Poco/Environment.h"
@@ -25,13 +23,14 @@
 #include "Poco/Ascii.h"
 #include "Poco/BasicEvent.h"
 #include "Poco/Delegate.h"
+#include "Poco/Checksum.h"
+#include "Poco/MakeUnique.h"
 #include "Poco/Exception.h"
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <cstring>
 
-GCC_DIAG_OFF(unused-variable)
 
 using Poco::Bugcheck;
 using Poco::Exception;
@@ -46,6 +45,8 @@ using Poco::BasicEvent;
 using Poco::delegate;
 using Poco::NullType;
 using Poco::InvalidAccessException;
+using Poco::Checksum;
+using Poco::makeUnique;
 
 
 namespace
@@ -71,6 +72,39 @@ namespace
 		
 	private:
 		AtomicCounter& _counter;
+	};
+
+	class NonDefaultConstructible
+	{
+	public:
+		NonDefaultConstructible(int val) : _val(val)
+		{
+		}
+
+		NonDefaultConstructible& operator=(int val)
+		{
+			_val = val;
+			return *this;
+		}
+
+		bool operator == (const NonDefaultConstructible& other) const
+		{
+			return (_val == other._val);
+		}
+
+		bool operator < (const NonDefaultConstructible& other) const
+		{
+			return (_val < other._val);
+		}
+
+		int value() const
+		{
+			return _val;
+		}
+
+	private:
+		NonDefaultConstructible();
+		int _val;
 	};
 }
 
@@ -113,7 +147,7 @@ struct Large
 #define ENABLE_BUGCHECK_TEST 0
 
 
-CoreTest::CoreTest(const std::string& name): CppUnit::TestCase(name)
+CoreTest::CoreTest(const std::string& rName): CppUnit::TestCase(rName)
 {
 }
 
@@ -182,7 +216,7 @@ void CoreTest::testBugcheck()
 
 void CoreTest::testEnvironment()
 {
-#if !defined(_WIN32_WCE) 
+#if !defined(_WIN32_WCE)
 	Environment::set("FOO", "BAR");
 	assert (Environment::has("FOO"));
 	assert (Environment::get("FOO") == "BAR");
@@ -195,7 +229,7 @@ void CoreTest::testEnvironment()
 	catch (Exception&)
 	{
 	}
-	
+	std::cout << std::endl;
 	std::cout << "OS Name:         " << Environment::osName() << std::endl;
 	std::cout << "OS Display Name: " << Environment::osDisplayName() << std::endl;
 	std::cout << "OS Version:      " << Environment::osVersion() << std::endl;
@@ -321,8 +355,8 @@ void CoreTest::testBuffer()
 
 void CoreTest::testAtomicCounter()
 {
-	AtomicCounter ac;
-	
+	AtomicCounter ac(0);
+
 	assert (ac.value() == 0);
 	assert (ac++ == 0);
 	assert (ac-- == 1);
@@ -363,6 +397,21 @@ void CoreTest::testAtomicCounter()
 
 void CoreTest::testNullable()
 {
+	Nullable<NonDefaultConstructible> ndc1;
+	Nullable<NonDefaultConstructible> ndc2;
+	assert (ndc1.isNull());
+	assert (ndc2.isNull());
+	assert (ndc1 == ndc2);
+	assert (!(ndc1 != ndc2));
+	assert (!(ndc1 > ndc2));
+	bool ge = (ndc1 >= ndc2);
+	assert (ndc1 >= ndc2);
+	assert (!(ndc1 < ndc2));
+	assert (ndc1 <= ndc2);
+	ndc1 = 42;
+	assert (!ndc1.isNull());
+	assert (ndc1.value() == 42);
+
 	Nullable<int> i;
 	Nullable<double> f;
 	Nullable<std::string> s;
@@ -534,6 +583,72 @@ void CoreTest::testAscii()
 }
 
 
+void CoreTest::testChecksum64()
+{
+	Poco::Checksum checksum64_0(Checksum::TYPE_CRC64);
+	Poco::Checksum checksum64_1(Checksum::TYPE_CRC64);
+	Poco::UInt64 crc64_0 = 0;
+	Poco::UInt64 crc64_1 = 0;
+	Poco::UInt64 crc64_2 = 0;
+	Poco::UInt64 crc64_3 = 0;
+	Poco::UInt64 crc64_4 = 0;
+	Poco::UInt64 crc64_5 = 0;
+	Poco::UInt64 crc64_6 = 0;
+	Poco::UInt64 crc64_7 = 0;
+	std::string str = "Hello world!!!";
+	const char c_str[] = "Hello People!!!";
+	const char c_str1[] = "Hello world!!!";
+	const char c_str2[] = "b";
+	const char c_str3[] = "c";
+	char ch = 'c';
+
+	checksum64_0.update(str);
+	crc64_0 = checksum64_0.checksum();               // crc64 of "Hello world!!!"
+	checksum64_0.update(c_str, (int)strlen(c_str));
+	crc64_1 = checksum64_0.checksum();               // crc64 of "Hello People!!!"
+	assert(crc64_0 != crc64_1);
+
+	checksum64_0.update(ch);
+	crc64_2 = checksum64_0.checksum();               // crc64 of 'c'
+	assert(crc64_0 != crc64_2);
+
+	assert(crc64_1 != crc64_2);
+
+	checksum64_0.update(c_str1);
+	crc64_3 = checksum64_0.checksum();               // crc64 of "Hello world!!!"
+	assert(crc64_0 == crc64_3);
+
+	str = "c";
+	checksum64_0.update(str);
+	crc64_4 = checksum64_0.checksum();              // crc64 of "c", fetching from checksum64_0 object
+	checksum64_1.update(ch);
+	crc64_5 = checksum64_1.checksum();              // crc64 of 'c', fetching from checksum64_1 object
+	assert(crc64_4 == crc64_5);
+
+	checksum64_0.update(c_str2, (int)strlen(c_str2));
+	crc64_6 = checksum64_0.checksum();              // crc64 of "b", fetching from checksum64_0 object
+	assert(crc64_5 != crc64_6);
+
+	checksum64_0.update(c_str3, (int)strlen(c_str3));
+	crc64_7 = checksum64_0.checksum();              // crc64 of "c", fetching from checksum64_0 object
+	assert(crc64_5 == crc64_7);
+}
+
+
+void CoreTest::testMakeUnique()
+{
+	assert (*makeUnique<int>() == 0);
+	assert (*makeUnique<int>(1729) == 1729);
+	assert (*makeUnique<std::string>() == "");
+	assert (*makeUnique<std::string>("meow") == "meow");
+	assert (*makeUnique<std::string>(6, 'z') == "zzzzzz");
+
+	auto up = makeUnique<int[]>(5);
+
+	for (int i = 0; i < 5; ++i) up[i] = i;
+	for (int i = 0; i < 5; ++i) assert (up[i] == i);
+}
+
 
 void CoreTest::setUp()
 {
@@ -561,6 +676,8 @@ CppUnit::Test* CoreTest::suite()
 	CppUnit_addTest(pSuite, CoreTest, testAtomicCounter);
 	CppUnit_addTest(pSuite, CoreTest, testNullable);
 	CppUnit_addTest(pSuite, CoreTest, testAscii);
+	CppUnit_addTest(pSuite, CoreTest, testChecksum64);
+	CppUnit_addTest(pSuite, CoreTest, testMakeUnique);
 
 	return pSuite;
 }

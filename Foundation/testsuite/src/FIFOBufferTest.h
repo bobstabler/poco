@@ -1,8 +1,6 @@
 //
 // FIFOBufferTest.h
 //
-// $Id: //poco/1.6/Foundation/testsuite/src/FIFOBufferTest.h#1 $
-//
 // Definition of the FIFOBufferTest class.
 //
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
@@ -17,7 +15,7 @@
 
 
 #include "Poco/Foundation.h"
-#include "CppUnit/TestCase.h"
+#include "Poco/CppUnit/TestCase.h"
 
 
 class FIFOBufferTest: public CppUnit::TestCase

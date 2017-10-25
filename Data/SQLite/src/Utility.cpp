@@ -1,9 +1,7 @@
 //
 // Utility.cpp
 //
-// $Id: //poco/Main/Data/SQLite/src/Utility.cpp#5 $
-//
-// Library: SQLite
+// Library: Data/SQLite
 // Package: SQLite
 // Module:  Utility
 //
@@ -63,6 +61,12 @@ Poco::Mutex Utility::_mutex;
 
 Utility::Utility()
 {
+	initializeDefaultTypes();
+}
+
+
+void Utility::initializeDefaultTypes()
+{
 	if (_types.empty())
 	{
 		_types.insert(TypeMap::value_type("", MetaColumn::FDT_STRING));
@@ -86,7 +90,7 @@ Utility::Utility()
 		_types.insert(TypeMap::value_type("UINTEGER32", MetaColumn::FDT_UINT32));
 		_types.insert(TypeMap::value_type("INT", MetaColumn::FDT_INT32));
 		_types.insert(TypeMap::value_type("INT32", MetaColumn::FDT_INT32));
-		_types.insert(TypeMap::value_type("INTEGER", MetaColumn::FDT_INT32));
+		_types.insert(TypeMap::value_type("INTEGER", MetaColumn::FDT_INT64));
 		_types.insert(TypeMap::value_type("INTEGER32", MetaColumn::FDT_INT32));
 		_types.insert(TypeMap::value_type("UINT64", MetaColumn::FDT_UINT64));
 		_types.insert(TypeMap::value_type("ULONG", MetaColumn::FDT_INT64));
@@ -97,6 +101,7 @@ Utility::Utility()
 		_types.insert(TypeMap::value_type("TINYINT", MetaColumn::FDT_INT8));
 		_types.insert(TypeMap::value_type("SMALLINT", MetaColumn::FDT_INT16));
 		_types.insert(TypeMap::value_type("BIGINT", MetaColumn::FDT_INT64));
+		_types.insert(TypeMap::value_type("LONGINT", MetaColumn::FDT_INT64));
 		_types.insert(TypeMap::value_type("COUNTER", MetaColumn::FDT_UINT64));
 		_types.insert(TypeMap::value_type("AUTOINCREMENT", MetaColumn::FDT_UINT64));
 		_types.insert(TypeMap::value_type("REAL", MetaColumn::FDT_DOUBLE));
@@ -114,12 +119,28 @@ Utility::Utility()
 		_types.insert(TypeMap::value_type("NCLOB", MetaColumn::FDT_STRING));
 		_types.insert(TypeMap::value_type("NTEXT", MetaColumn::FDT_STRING));
 		_types.insert(TypeMap::value_type("NVARCHAR", MetaColumn::FDT_STRING));
+		_types.insert(TypeMap::value_type("LONGVARCHAR", MetaColumn::FDT_STRING));
 		_types.insert(TypeMap::value_type("BLOB", MetaColumn::FDT_BLOB));
 		_types.insert(TypeMap::value_type("DATE", MetaColumn::FDT_DATE));
 		_types.insert(TypeMap::value_type("TIME", MetaColumn::FDT_TIME));
 		_types.insert(TypeMap::value_type("DATETIME", MetaColumn::FDT_TIMESTAMP));
 		_types.insert(TypeMap::value_type("TIMESTAMP", MetaColumn::FDT_TIMESTAMP));
 	}
+}
+
+
+void Utility::addColumnType(std::string sqliteType, MetaColumn::ColumnDataType pocoType)
+{
+	// Check for errors in the mapping
+	if (MetaColumn::FDT_UNKNOWN == pocoType)
+		throw Poco::Data::NotSupportedException("Cannot map to unknown poco type.");
+
+	// Initialize default types
+	initializeDefaultTypes();
+
+	// Add type to internal map
+	Poco::toUpperInPlace(sqliteType);
+	_types[sqliteType] = pocoType;
 }
 
 
@@ -145,9 +166,10 @@ MetaColumn::ColumnDataType Utility::getColumnType(sqlite3_stmt* pStmt, std::size
 	sqliteType = sqliteType.substr(0, sqliteType.find_first_of(" ("));
 
 	TypeMap::const_iterator it = _types.find(Poco::trimInPlace(sqliteType));
-	if (_types.end() == it)	throw Poco::NotFoundException();
-
-	return it->second;
+	if (_types.end() == it)	
+		return MetaColumn::FDT_BLOB;
+	else
+		return it->second;
 }
 
 
@@ -167,7 +189,9 @@ void Utility::throwException(int rc, const std::string& addErrMsg)
 		throw ExecutionAbortedException(std::string("Callback routine requested an abort"), addErrMsg);
 	case SQLITE_BUSY:
 	case SQLITE_BUSY_RECOVERY:
+#if defined(SQLITE_BUSY_SNAPSHOT)
 	case SQLITE_BUSY_SNAPSHOT:
+#endif
 		throw DBLockedException(std::string("The database file is locked"), addErrMsg);
 	case SQLITE_LOCKED:
 		throw TableLockedException(std::string("A table in the database is locked"), addErrMsg);

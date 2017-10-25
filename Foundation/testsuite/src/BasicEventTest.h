@@ -1,8 +1,6 @@
 //
 // BasicEventTest.h
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/BasicEventTest.h#1 $
-//
 // Tests for BasicEvent
 //
 // Copyright (c) 2006, Applied Informatics Software Engineering GmbH.
@@ -17,7 +15,7 @@
 
 
 #include "Poco/Foundation.h"
-#include "CppUnit/TestCase.h"
+#include "Poco/CppUnit/TestCase.h"
 #include "Poco/BasicEvent.h"
 #include "Poco/EventArgs.h"
 
@@ -46,7 +44,8 @@ public:
 	void testOverwriteDelegate();
 	void testAsyncNotify();
 	void testNullMutex();
-	
+	void testLambda();
+
 	void setUp();
 	void tearDown();
 	static CppUnit::Test* suite();

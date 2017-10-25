@@ -1,8 +1,6 @@
 //
 // SecureSocketImpl.cpp
 //
-// $Id: //poco/1.4/NetSSL_OpenSSL/src/SecureSocketImpl.cpp#11 $
-//
 // Library: NetSSL_OpenSSL
 // Package: SSLSockets
 // Module:  SecureSocketImpl
@@ -47,7 +45,7 @@ namespace Poco {
 namespace Net {
 
 
-SecureSocketImpl::SecureSocketImpl(Poco::AutoPtr<SocketImpl> pSocketImpl, Context::Ptr pContext): 
+SecureSocketImpl::SecureSocketImpl(Poco::AutoPtr<SocketImpl> pSocketImpl, Context::Ptr pContext):
 	_pSSL(0),
 	_pSocket(pSocketImpl),
 	_pContext(pContext),
@@ -152,7 +150,7 @@ void SecureSocketImpl::connectSSL(bool performHandshake)
 	BIO_set_fd(pBIO, static_cast<int>(_pSocket->sockfd()), BIO_NOCLOSE);
 
 	_pSSL = SSL_new(_pContext->sslContext());
-	if (!_pSSL) 
+	if (!_pSSL)
 	{
 		BIO_free(pBIO);
 		throw SSLException("Cannot create SSL object");
@@ -213,20 +211,31 @@ void SecureSocketImpl::listen(int backlog)
 void SecureSocketImpl::shutdown()
 {
 	if (_pSSL)
-	{        
+	{
         // Don't shut down the socket more than once.
         int shutdownState = SSL_get_shutdown(_pSSL);
         bool shutdownSent = (shutdownState & SSL_SENT_SHUTDOWN) == SSL_SENT_SHUTDOWN;
         if (!shutdownSent)
         {
-			// A proper clean shutdown would require us to
-			// retry the shutdown if we get a zero return
-			// value, until SSL_shutdown() returns 1.
-			// However, this will lead to problems with
-			// most web browsers, so we just set the shutdown
-			// flag by calling SSL_shutdown() once and be
-			// done with it.
+			// A proper clean shutdown requires us to
+			// call SSL_shutdown() a second time if the
+			// first call returns 0.
+			// Previously, this lead to problems with
+			// most web browsers, so we just called
+			// SSL_shutdown() once.
+			// It seems that behavior has changed in newer
+			// OpenSSL and/or browser versions, and things
+			// seem to work better now.
 			int rc = SSL_shutdown(_pSSL);
+#if FIXME
+			#1605: try to do a proper SSL_shutdown()
+			This fix for the issue above breaks the
+			HTTPSClientSessionTest::testCachedSession() Unit test
+			if (rc == 0 && _pSocket->getBlocking())
+			{
+				rc = SSL_shutdown(_pSSL);
+			}
+#endif
 			if (rc < 0) handleError(rc);
 			if (_pSocket->getBlocking())
 			{
@@ -270,8 +279,8 @@ int SecureSocketImpl::sendBytes(const void* buffer, int length, int flags)
 	{
 		rc = SSL_write(_pSSL, buffer, length);
 	}
-	while (rc <= 0 && _pSocket->lastError() == POCO_EINTR);
-	if (rc <= 0) 
+	while (mustRetry(rc));
+	if (rc <= 0)
 	{
 		rc = handleError(rc);
 		if (rc == 0) throw SSLConnectionUnexpectedlyClosedException();
@@ -298,8 +307,8 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 	{
 		rc = SSL_read(_pSSL, buffer, length);
 	}
-	while (rc <= 0 && _pSocket->lastError() == POCO_EINTR);
-	if (rc <= 0) 
+	while (mustRetry(rc));
+	if (rc <= 0)
 	{
 		return handleError(rc);
 	}
@@ -325,8 +334,8 @@ int SecureSocketImpl::completeHandshake()
 	{
 		rc = SSL_do_handshake(_pSSL);
 	}
-	while (rc <= 0 && _pSocket->lastError() == POCO_EINTR);
-	if (rc <= 0) 
+	while (mustRetry(rc));
+	if (rc <= 0)
 	{
 		return handleError(rc);
 	}
@@ -376,8 +385,15 @@ long SecureSocketImpl::verifyPeerCertificateImpl(const std::string& hostName)
 
 bool SecureSocketImpl::isLocalHost(const std::string& hostName)
 {
-	SocketAddress addr(hostName, 0);
-	return addr.host().isLoopback();
+	try
+	{
+		SocketAddress addr(hostName, 0);
+		return addr.host().isLoopback();
+	}
+	catch (Poco::Exception&)
+	{
+		return false;
+	}
 }
 
 
@@ -387,6 +403,42 @@ X509* SecureSocketImpl::peerCertificate() const
 		return SSL_get_peer_certificate(_pSSL);
 	else
 		return 0;
+}
+
+
+bool SecureSocketImpl::mustRetry(int rc)
+{
+	if (rc <= 0)
+	{
+		int sslError = SSL_get_error(_pSSL, rc);
+		int socketError = _pSocket->lastError();
+		switch (sslError)
+		{
+		case SSL_ERROR_WANT_READ:
+			if (_pSocket->getBlocking())
+			{
+				if (_pSocket->poll(_pSocket->getReceiveTimeout(), Poco::Net::Socket::SELECT_READ))
+					return true;
+				else
+					throw Poco::TimeoutException();
+			}
+			break;
+		case SSL_ERROR_WANT_WRITE:
+			if (_pSocket->getBlocking())
+			{
+				if (_pSocket->poll(_pSocket->getSendTimeout(), Poco::Net::Socket::SELECT_WRITE))
+					return true;
+				else
+					throw Poco::TimeoutException();
+			}
+			break;
+		case SSL_ERROR_SYSCALL:
+			return socketError == POCO_EAGAIN || socketError == POCO_EINTR;
+		default:
+			return socketError == POCO_EINTR;
+		}
+	}
+	return false;
 }
 
 
@@ -402,17 +454,10 @@ int SecureSocketImpl::handleError(int rc)
 	case SSL_ERROR_ZERO_RETURN:
 		return 0;
 	case SSL_ERROR_WANT_READ:
-		if (_pSocket->getBlocking() && error != 0)
-		{
-			if (error == POCO_EAGAIN)
-				throw TimeoutException(error);
-			else
-				SocketImpl::error(error);
-		}
 		return SecureStreamSocket::ERR_SSL_WANT_READ;
 	case SSL_ERROR_WANT_WRITE:
 		return SecureStreamSocket::ERR_SSL_WANT_WRITE;
-	case SSL_ERROR_WANT_CONNECT: 
+	case SSL_ERROR_WANT_CONNECT:
 	case SSL_ERROR_WANT_ACCEPT:
 	case SSL_ERROR_WANT_X509_LOOKUP:
 		// these should not occur
@@ -421,11 +466,7 @@ int SecureSocketImpl::handleError(int rc)
 	case SSL_ERROR_SYSCALL:
 		if (error != 0)
 		{
-			if (_pSocket->getBlocking() && error == POCO_EAGAIN)
-				throw TimeoutException(error);
-			else
-				SocketImpl::error(error);
-			return rc;
+			SocketImpl::error(error);
 		}
 		// fallthrough
 	default:

@@ -1,8 +1,6 @@
 //
 // Driver.cpp
 //
-// $Id: //poco/1.4/NetSSL_Win/testsuite/src/Driver.cpp#1 $
-//
 // Console-based test driver for Poco NetSSL.
 //
 // Copyright (c) 2006-2014, Applied Informatics Software Engineering GmbH.
@@ -12,7 +10,7 @@
 //
 
 
-#include "CppUnit/TestRunner.h"
+#include "Poco/CppUnit/TestRunner.h"
 #include "NetSSLTestSuite.h"
 #include "Poco/Util/Application.h"
 #include "Poco/Net/HTTPStreamFactory.h"

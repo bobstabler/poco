@@ -1,8 +1,6 @@
 //
 // MailMessage.cpp
 //
-// $Id: //poco/1.4/Net/src/MailMessage.cpp#2 $
-//
 // Library: Net
 // Package: Mail
 // Module:  MailMessage
@@ -54,7 +52,7 @@ namespace Net {
 namespace
 {
 	class MultiPartHandler: public PartHandler
-		/// This is a default part handler for multipart messages, used when there 
+		/// This is a default part handler for multipart messages, used when there
 		/// is no external handler provided to he MailMessage. This handler
 		/// will handle all types of message parts, including attachments.
 	{
@@ -67,14 +65,14 @@ namespace
 			/// in its entirety, including attachments.
 		{
 		}
-		
+
 		~MultiPartHandler()
 			/// Destroys string part handler.
 		{
 		}
-		
+
 		void handlePart(const MessageHeader& header, std::istream& stream)
-			/// Handles a part. If message pointer was provided at construction time, 
+			/// Handles a part. If message pointer was provided at construction time,
 			/// the message pointed to will be properly populated so it could be written
 			/// back out at a later point in time.
 		{
@@ -94,38 +92,63 @@ namespace
 						cte = MailMessage::ENCODING_BASE64;
 				}
 
+				std::string contentType = header.get(MailMessage::HEADER_CONTENT_TYPE, "text/plain; charset=us-ascii");
+				std::string contentDisp = header.get(MailMessage::HEADER_CONTENT_DISPOSITION, "");
+				std::string filename;
+				if (!contentDisp.empty())
+					filename = getParamFromHeader(contentDisp, "filename");
+				if (filename.empty())
+					filename = getParamFromHeader(contentType, "name");
+				PartSource* pPS = _pMsg->createPartStore(tmp, contentType, filename);
+				poco_check_ptr (pPS);
 				NameValueCollection::ConstIterator it = header.begin();
 				NameValueCollection::ConstIterator end = header.end();
-				PartSource* pPS = _pMsg->createPartStore(tmp, 
-					header[MailMessage::HEADER_CONTENT_TYPE], 
-					getFileNameFromDisp(it->second));
-				poco_check_ptr (pPS);
+				bool added = false;
 				for (; it != end; ++it)
 				{
-					if (MailMessage::HEADER_CONTENT_DISPOSITION == it->first)
+					if (!added && MailMessage::HEADER_CONTENT_DISPOSITION == it->first)
 					{
-						if (it->second == "inline") _pMsg->addContent(pPS, cte);
-						else _pMsg->addAttachment("", pPS, cte);
+						if (it->second == "inline")
+							_pMsg->addContent(pPS, cte);
+						else
+							_pMsg->addAttachment(getPartName(header), pPS, cte);
+						added = true;
 					}
 					
 					pPS->headers().set(it->first, it->second);
 				}
+
+				if (contentDisp.empty())
+				{
+					_pMsg->addContent(pPS, cte);
+					added = true;
+				}
+
+				if (!added) delete pPS;
 			}
 		}
 		
 	private:
-		std::string getFileNameFromDisp(const std::string& str)
+		std::string getParamFromHeader(const std::string& header, const std::string& param)
 		{
-			StringTokenizer st(str, ";=", StringTokenizer::TOK_IGNORE_EMPTY | StringTokenizer::TOK_TRIM);
+			StringTokenizer st(header, ";=", StringTokenizer::TOK_IGNORE_EMPTY | StringTokenizer::TOK_TRIM);
 			StringTokenizer::Iterator it = st.begin();
 			StringTokenizer::Iterator end = st.end();
-			for (; it != end; ++it) { if (*it == "filename") break; }
+			for (; it != end; ++it) { if (icompare(*it, param) == 0) break; }
 			if (it != end)
 			{
 				++it;
 				if (it == end) return "";
 				return *it;
 			}
+			return "";
+		}
+
+		std::string getPartName(const MessageHeader& header)
+		{
+			std::string ct = MailMessage::HEADER_CONTENT_TYPE;
+			if (header.has(ct))
+				return getParamFromHeader(header[ct], "name");
 			return "";
 		}
 
@@ -183,7 +206,8 @@ const std::string MailMessage::CTE_QUOTED_PRINTABLE("quoted-printable");
 const std::string MailMessage::CTE_BASE64("base64");
 
 
-MailMessage::MailMessage(PartStoreFactory* pStoreFactory): 
+MailMessage::MailMessage(PartStoreFactory* pStoreFactory):
+	_encoding(),
 	_pStoreFactory(pStoreFactory)
 {
 	Poco::Timestamp now;
@@ -200,7 +224,7 @@ MailMessage::~MailMessage()
 	}
 }
 
-	
+
 void MailMessage::addRecipient(const MailRecipient& recipient)
 {
 	_recipients.push_back(recipient);
@@ -256,13 +280,13 @@ void MailMessage::setContentType(const std::string& mediaType)
 	set(HEADER_CONTENT_TYPE, mediaType);
 }
 
-	
+
 void MailMessage::setContentType(const MediaType& mediaType)
 {
 	setContentType(mediaType.toString());
 }
 
-	
+
 const std::string& MailMessage::getContentType() const
 {
 	if (has(HEADER_CONTENT_TYPE))
@@ -277,7 +301,7 @@ void MailMessage::setDate(const Poco::Timestamp& dateTime)
 	set(HEADER_DATE, DateTimeFormatter::format(dateTime, DateTimeFormat::RFC1123_FORMAT));
 }
 
-	
+
 Poco::Timestamp MailMessage::getDate() const
 {
 	const std::string& dateTime = get(HEADER_DATE);
@@ -285,7 +309,7 @@ Poco::Timestamp MailMessage::getDate() const
 	return DateTimeParser::parse(dateTime, tzd).timestamp();
 }
 
-	
+
 bool MailMessage::isMultipart() const
 {
 	MediaType mediaType = getContentType();
@@ -312,7 +336,7 @@ void MailMessage::addContent(PartSource* pSource, ContentTransferEncoding encodi
 	addPart("", pSource, CONTENT_INLINE, encoding);
 }
 
-	
+
 void MailMessage::addAttachment(const std::string& name, PartSource* pSource, ContentTransferEncoding encoding)
 {
 	addPart(name, pSource, CONTENT_ATTACHMENT, encoding);
@@ -457,9 +481,11 @@ void MailMessage::writeEncoded(std::istream& istr, std::ostream& ostr, ContentTr
 void MailMessage::readHeader(std::istream& istr)
 {
 	clear();
-	MessageHeader::read(istr);
+	MessageHeader::RecipientList recipients;
+	MessageHeader::read(istr, &recipients);
 	istr.get(); // \r
 	if ('\n' == istr.peek()) istr.get(); // \n
+	for (const auto& r : recipients) addRecipient(r);
 }
 
 
@@ -486,20 +512,27 @@ void MailMessage::readPart(std::istream& istr, const MessageHeader& header, Part
 		// get rid of a parameter if one is set
 		std::string::size_type pos = encoding.find(';');
 		if (pos != std::string::npos)
-			encoding.resize(pos);
+		    encoding.resize(pos);
 	}
 	if (icompare(encoding, CTE_QUOTED_PRINTABLE) == 0)
 	{
 		QuotedPrintableDecoder decoder(istr);
 		handlePart(decoder, header, handler);
+		_encoding = ENCODING_QUOTED_PRINTABLE;
 	}
 	else if (icompare(encoding, CTE_BASE64) == 0)
 	{
 		Base64Decoder decoder(istr);
 		handlePart(decoder, header, handler);
+		_encoding = ENCODING_BASE64;
 	}
 	else
 	{
+		if (icompare(encoding, CTE_7BIT) == 0)
+			_encoding = ENCODING_7BIT;
+		else if (icompare(encoding, CTE_8BIT) == 0)
+			_encoding = ENCODING_8BIT;
+
 		handlePart(istr, header, handler);
 	}
 }

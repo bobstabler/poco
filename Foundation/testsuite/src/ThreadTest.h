@@ -1,8 +1,6 @@
 //
 // ThreadTest.h
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/ThreadTest.h#1 $
-//
 // Definition of the ThreadTest class.
 //
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
@@ -17,7 +15,7 @@
 
 
 #include "Poco/Foundation.h"
-#include "CppUnit/TestCase.h"
+#include "Poco/CppUnit/TestCase.h"
 
 
 class ThreadTest: public CppUnit::TestCase
@@ -41,6 +39,7 @@ public:
     void testThreadStackSize();
     void testSleep();
     void testAffinity();
+    void testJoinNotStarted();
 
     void setUp();
     void tearDown();

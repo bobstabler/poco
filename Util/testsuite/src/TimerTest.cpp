@@ -1,8 +1,6 @@
 //
 // TimerTest.cpp
 //
-// $Id: //poco/1.4/Util/testsuite/src/TimerTest.cpp#1 $
-//
 // Copyright (c) 2009, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "TimerTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/Util/Timer.h"
 #include "Poco/Util/TimerTaskAdapter.h"
 

@@ -1,8 +1,6 @@
 //
 // CoreTest.h
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/CoreTest.h#1 $
-//
 // Definition of the CoreTest class.
 //
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
@@ -17,7 +15,7 @@
 
 
 #include "Poco/Foundation.h"
-#include "CppUnit/TestCase.h"
+#include "Poco/CppUnit/TestCase.h"
 
 
 class CoreTest: public CppUnit::TestCase
@@ -35,6 +33,8 @@ public:
 	void testAtomicCounter();
 	void testNullable();
 	void testAscii();
+	void testChecksum64();
+	void testMakeUnique();
 
 	void setUp();
 	void tearDown();

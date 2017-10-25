@@ -1,8 +1,6 @@
 //
 // FIFOBufferTest.cpp
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/FIFOBufferTest.cpp#1 $
-//
 // Copyright (c) 2005-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "FIFOBufferTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/Buffer.h"
 #include "Poco/Exception.h"
 #include "Poco/Delegate.h"
@@ -31,8 +29,8 @@ using Poco::delegate;
 using std::memcpy;
 
 
-FIFOBufferTest::FIFOBufferTest(const std::string& name): 
-	CppUnit::TestCase(name),
+FIFOBufferTest::FIFOBufferTest(const std::string& rName):
+	CppUnit::TestCase(rName),
 	_notToReadable(0),
 	_notToWritable(0),
 	_readableToNot(0),

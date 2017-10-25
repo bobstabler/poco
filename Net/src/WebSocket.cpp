@@ -1,8 +1,6 @@
 //
 // WebSocket.cpp
 //
-// $Id: //poco/1.4/Net/src/WebSocket.cpp#8 $
-//
 // Library: Net
 // Package: WebSocket
 // Module:  WebSocket
@@ -19,8 +17,8 @@
 #include "Poco/Net/HTTPServerRequestImpl.h"
 #include "Poco/Net/HTTPServerResponse.h"
 #include "Poco/Net/HTTPClientSession.h"
+#include "Poco/Net/HTTPServerSession.h"
 #include "Poco/Net/NetException.h"
-#include "Poco/Buffer.h"
 #include "Poco/MemoryStream.h"
 #include "Poco/NullStream.h"
 #include "Poco/BinaryWriter.h"
@@ -29,7 +27,6 @@
 #include "Poco/String.h"
 #include "Poco/Random.h"
 #include "Poco/StreamCopier.h"
-#include "Poco/Buffer.h"
 #include <sstream>
 
 
@@ -60,7 +57,7 @@ WebSocket::WebSocket(HTTPClientSession& cs, HTTPRequest& request, HTTPResponse& 
 }
 
 
-WebSocket::WebSocket(const Socket& socket): 
+WebSocket::WebSocket(const Socket& socket):
 	StreamSocket(socket)
 {
 	if (!dynamic_cast<WebSocketImpl*>(impl()))
@@ -146,7 +143,9 @@ WebSocketImpl* WebSocket::accept(HTTPServerRequest& request, HTTPServerResponse&
 		response.set("Sec-WebSocket-Accept", computeAccept(key));
 		response.setContentLength(0);
 		response.send().flush();
-		return new WebSocketImpl(static_cast<StreamSocketImpl*>(static_cast<HTTPServerRequestImpl&>(request).detachSocket().impl()), false);
+		
+		HTTPServerRequestImpl& requestImpl = static_cast<HTTPServerRequestImpl&>(request);
+		return new WebSocketImpl(static_cast<StreamSocketImpl*>(requestImpl.detachSocket().impl()), requestImpl.session(), false);
 	}
 	else throw WebSocketException("No WebSocket handshake", WS_ERR_NO_HANDSHAKE);
 }
@@ -206,15 +205,15 @@ WebSocketImpl* WebSocket::connect(HTTPClientSession& cs, HTTPRequest& request, H
 WebSocketImpl* WebSocket::completeHandshake(HTTPClientSession& cs, HTTPResponse& response, const std::string& key)
 {
 	std::string connection = response.get("Connection", "");
-	if (Poco::icompare(connection, "Upgrade") != 0) 
+	if (Poco::icompare(connection, "Upgrade") != 0)
 		throw WebSocketException("No Connection: Upgrade header in handshake response", WS_ERR_NO_HANDSHAKE);
 	std::string upgrade = response.get("Upgrade", "");
 	if (Poco::icompare(upgrade, "websocket") != 0)
 		throw WebSocketException("No Upgrade: websocket header in handshake response", WS_ERR_NO_HANDSHAKE);
 	std::string accept = response.get("Sec-WebSocket-Accept", "");
 	if (accept != computeAccept(key))
-		throw WebSocketException("Invalid or missing Sec-WebSocket-Accept header in handshake response", WS_ERR_NO_HANDSHAKE);
-	return new WebSocketImpl(static_cast<StreamSocketImpl*>(cs.detachSocket().impl()), true);
+		throw WebSocketException("Invalid or missing Sec-WebSocket-Accept header in handshake response", WS_ERR_HANDSHAKE_ACCEPT);
+	return new WebSocketImpl(static_cast<StreamSocketImpl*>(cs.detachSocket().impl()), cs, true);
 }
 
 

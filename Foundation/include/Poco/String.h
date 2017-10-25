@@ -1,8 +1,6 @@
 //
 // String.h
 //
-// $Id: //poco/1.4/Foundation/include/Poco/String.h#1 $
-//
 // Library: Foundation
 // Package: Core
 // Module:  String
@@ -170,16 +168,16 @@ S& toLowerInPlace(S& str)
 template <class S, class It>
 int icompare(
 	const S& str,
-	typename S::size_type pos, 
+	typename S::size_type pos,
 	typename S::size_type n,
-	It it2, 
+	It it2,
 	It end2)
 	/// Case-insensitive string comparison
 {
 	typename S::size_type sz = str.size();
 	if (pos > sz) pos = sz;
 	if (pos + n > sz) n = sz - pos;
-	It it1  = str.begin() + pos; 
+	It it1  = str.begin() + pos;
 	It end1 = str.begin() + pos + n;
 	while (it1 != end1 && it2 != end2)
 	{
@@ -250,9 +248,9 @@ int icompare(const S& str1, typename S::size_type pos, typename S::size_type n, 
 
 template <class S>
 int icompare(
-	const S& str1, 
-	typename S::size_type pos1, 
-	typename S::size_type n1, 
+	const S& str1,
+	typename S::size_type pos1,
+	typename S::size_type n1,
 	const S& str2,
 	typename S::size_type pos2,
 	typename S::size_type n2)
@@ -266,9 +264,9 @@ int icompare(
 
 template <class S>
 int icompare(
-	const S& str1, 
-	typename S::size_type pos1, 
-	typename S::size_type n, 
+	const S& str1,
+	typename S::size_type pos1,
+	typename S::size_type n,
 	const S& str2,
 	typename S::size_type pos2)
 {
@@ -290,7 +288,7 @@ int icompare(
 	typename S::size_type sz = str.size();
 	if (pos > sz) pos = sz;
 	if (pos + n > sz) n = sz - pos;
-	typename S::const_iterator it  = str.begin() + pos; 
+	typename S::const_iterator it  = str.begin() + pos;
 	typename S::const_iterator end = str.begin() + pos + n;
 	while (it != end && *ptr)
 	{
@@ -353,7 +351,7 @@ S translate(const S& str, const S& from, const S& to)
 	/// from replaced by the corresponding (by position)
 	/// characters in to. If there is no corresponding
 	/// character in to, the character is removed from
-	/// the copy. 
+	/// the copy.
 {
 	S result;
 	result.reserve(str.size());
@@ -540,7 +538,7 @@ Foundation_API std::string& replaceInPlace(std::string& str, const std::string::
 Foundation_API std::string& removeInPlace(std::string& str, const std::string::value_type ch, std::string::size_type start = 0);
 
 
-#endif	
+#endif
 
 
 template <class S>
@@ -623,6 +621,22 @@ S cat(const S& delim, const It& begin, const It& end)
 }
 
 
+template <class S>
+bool startsWith(const S& str, const S& prefix)
+	/// Tests whether the string starts with the given prefix.
+{
+	return str.size() >= prefix.size() && equal(prefix.begin(), prefix.end(), str.begin());
+}
+
+
+template <class S>
+bool endsWith(const S& str, const S& suffix)
+	/// Tests whether the string ends with the given suffix.
+{
+	return str.size() >= suffix.size() && equal(suffix.rbegin(), suffix.rend(), str.rbegin());
+}
+
+
 //
 // case-insensitive string equality
 //
@@ -676,7 +690,7 @@ std::size_t isubstr(const T& str, const T& sought)
 	/// without regards to case.
 {
 	typename T::const_iterator it = std::search(str.begin(), str.end(),
-		sought.begin(), sought.end(), 
+		sought.begin(), sought.end(),
 		i_char_traits<typename T::value_type>::eq);
 
 	if (it != str.end()) return it - str.begin();

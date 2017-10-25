@@ -1,8 +1,6 @@
 //
 // FIFOBufferTestSuite.h
 //
-// $Id: //poco/1.6/Foundation/testsuite/src/FIFOBufferTestSuite.h#1 $
-//
 // Definition of the FIFOBufferTestSuite class.
 //
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
@@ -16,7 +14,7 @@
 #define FIFOBufferTestSuite_INCLUDED
 
 
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestSuite.h"
 
 
 class FIFOBufferTestSuite

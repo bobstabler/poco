@@ -1,8 +1,6 @@
 //
 // DirectoryIteratorsTest.h
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/DirectoryIteratorsTest.h#1 $
-//
 // Definition of the DirectoryIteratorsTest class.
 //
 // Copyright (c) 2012, Applied Informatics Software Engineering GmbH.
@@ -18,7 +16,7 @@
 
 #include "Poco/Foundation.h"
 #include "Poco/Path.h"
-#include "CppUnit/TestCase.h"
+#include "Poco/CppUnit/TestCase.h"
 
 
 class DirectoryIteratorsTest: public CppUnit::TestCase

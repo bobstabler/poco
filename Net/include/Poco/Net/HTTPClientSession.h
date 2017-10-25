@@ -1,8 +1,6 @@
 //
 // HTTPClientSession.h
 //
-// $Id: //poco/1.4/Net/include/Poco/Net/HTTPClientSession.h#8 $
-//
 // Library: Net
 // Package: HTTPClient
 // Module:  HTTPClientSession
@@ -204,7 +202,7 @@ public:
 		/// for the next request.
 		
 	virtual std::istream& receiveResponse(HTTPResponse& response);
-		/// Receives the header for the response to the previous 
+		/// Receives the header for the response to the previous
 		/// HTTP request.
 		///
 		/// The returned input stream can be used to read
@@ -215,7 +213,7 @@ public:
 		/// It must be ensured that the response stream
 		/// is fully consumed before sending a new request
 		/// and persistent connections are enabled. Otherwise,
-		/// the unread part of the response body may be treated as 
+		/// the unread part of the response body may be treated as
 		/// part of the next request's response header, resulting
 		/// in a Poco::Net::MessageException being thrown.
 		///
@@ -227,6 +225,24 @@ public:
 		/// to ensure a new connection will be set up
 		/// for the next request.
 		
+	virtual bool peekResponse(HTTPResponse& response);
+		/// If the request contains a "Expect: 100-continue" header,
+		/// (see HTTPRequest::setExpectContinue()) this method can be
+		/// used to check whether the server has sent a 100 Continue response
+		/// before continuing with the request, i.e. sending the request body,
+		/// after calling sendRequest().
+		///
+		/// Returns true if the server has responded with 100 Continue,
+		/// otherwise false. The HTTPResponse object contains the
+		/// response sent by the server.
+		///
+		/// In any case, receiveResponse() must be called afterwards as well in
+		/// order to complete the request. The same HTTPResponse object
+		/// passed to peekResponse() must also be passed to receiveResponse().
+		///
+		/// This method should only be called if the request contains
+		/// a "Expect: 100-continue" header.
+
 	void reset();
 		/// Resets the session and closes the socket.
 		///
@@ -291,6 +307,7 @@ private:
 	bool            _reconnect;
 	bool            _mustReconnect;
 	bool            _expectResponseBody;
+	bool            _responseReceived;
 	Poco::SharedPtr<std::ostream> _pRequestStream;
 	Poco::SharedPtr<std::istream> _pResponseStream;
 

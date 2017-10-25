@@ -1,8 +1,6 @@
 #
 # Makefile
 #
-# $Id: //poco/1.4/Net/testsuite/Makefile#2 $
-#
 # Makefile for Poco Net testsuite
 #
 
@@ -32,7 +30,7 @@ objects = \
 
 target         = testrunner
 target_version = 1
-target_libs    = PocoNet PocoFoundation CppUnit
+target_libs    = PocoNet PocoFoundation PocoCppUnit
 
 include $(POCO_BASE)/build/rules/exec
 

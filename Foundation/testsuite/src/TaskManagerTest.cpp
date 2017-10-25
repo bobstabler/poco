@@ -1,8 +1,6 @@
 //
 // TaskManagerTest.cpp
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/TaskManagerTest.cpp#1 $
-//
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "TaskManagerTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/Exception.h"
 #include "Poco/TaskManager.h"
 #include "Poco/Task.h"
@@ -51,7 +49,7 @@ namespace
 	class TestTask: public Task
 	{
 	public:
-		TestTask(): 
+		TestTask():
 			Task("TestTask"),
 			_fail(false)
 		{
@@ -183,7 +181,7 @@ namespace
 	class CustomNotificationTask: public Task
 	{
 	public:
-		CustomNotificationTask(const T& t): 
+		CustomNotificationTask(const T& t):
 			Task("CustomNotificationTask"),
 			_custom(t)
 		{
@@ -234,7 +232,7 @@ namespace
 }
 
 
-TaskManagerTest::TaskManagerTest(const std::string& name): CppUnit::TestCase(name)
+TaskManagerTest::TaskManagerTest(const std::string& rName): CppUnit::TestCase(rName)
 {
 }
 

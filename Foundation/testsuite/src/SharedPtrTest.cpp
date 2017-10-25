@@ -1,8 +1,6 @@
 //
 // SharedPtrTest.cpp
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/SharedPtrTest.cpp#2 $
-//
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -11,8 +9,8 @@
 
 
 #include "SharedPtrTest.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/SharedPtr.h"
 #include "Poco/Exception.h"
 
@@ -26,7 +24,7 @@ namespace
 	class TestObject
 	{
 	public:
-		TestObject(const std::string& data): _data(data)
+		TestObject(const std::string& rData): _data(rData)
 		{
 			++_count;
 		}
@@ -71,7 +69,7 @@ namespace
 }
 
 
-SharedPtrTest::SharedPtrTest(const std::string& name): CppUnit::TestCase(name)
+SharedPtrTest::SharedPtrTest(const std::string& rName): CppUnit::TestCase(rName)
 {
 }
 

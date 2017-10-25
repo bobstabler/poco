@@ -1,8 +1,6 @@
 //
 // BasicEventTest.cpp
 //
-// $Id: //poco/1.4/Foundation/testsuite/src/BasicEventTest.cpp#2 $
-//
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
@@ -12,13 +10,14 @@
 
 #include "BasicEventTest.h"
 #include "DummyDelegate.h"
-#include "CppUnit/TestCaller.h"
-#include "CppUnit/TestSuite.h"
+#include "Poco/CppUnit/TestCaller.h"
+#include "Poco/CppUnit/TestSuite.h"
 #include "Poco/Expire.h"
 #include "Poco/Delegate.h"
 #include "Poco/FunctionDelegate.h"
 #include "Poco/Thread.h"
 #include "Poco/Exception.h"
+#include "Poco/StdFunctionDelegate.h"
 
 
 using namespace Poco;
@@ -27,7 +26,7 @@ using namespace Poco;
 #define LARGEINC 100
 
 
-BasicEventTest::BasicEventTest(const std::string& name): CppUnit::TestCase(name)
+BasicEventTest::BasicEventTest(const std::string& rName): CppUnit::TestCase(rName)
 {
 }
 
@@ -317,6 +316,22 @@ void BasicEventTest::testAsyncNotify()
 	assert (_count == LARGEINC);
 }
 
+
+void BasicEventTest::testLambda()
+{
+	int count = 0;
+	auto f = StdFunctionDelegate<int>([&](const void *, int &args) { count += args; });
+
+	Simple += f;
+	int cparam = 1;
+	Simple.notify(this, cparam);
+	assert(count == 1);
+
+	Simple -= f;
+	assert(Simple.empty());
+}
+
+
 void BasicEventTest::onStaticVoid(const void* pSender)
 {
 	BasicEventTest* p = const_cast<BasicEventTest*>(reinterpret_cast<const BasicEventTest*>(pSender));
@@ -404,7 +419,7 @@ void BasicEventTest::setUp()
 {
 	_count = 0;
 	// must clear events, otherwise repeating test executions will fail
-	// because tests are only created once, only setup is called before 
+	// because tests are only created once, only setup is called before
 	// each test run
 	Void.clear();
 	Simple.clear();
@@ -436,5 +451,6 @@ CppUnit::Test* BasicEventTest::suite()
 	CppUnit_addTest(pSuite, BasicEventTest, testOverwriteDelegate);
 	CppUnit_addTest(pSuite, BasicEventTest, testAsyncNotify);
 	CppUnit_addTest(pSuite, BasicEventTest, testNullMutex);
+	CppUnit_addTest(pSuite, BasicEventTest, testLambda);
 	return pSuite;
 }
